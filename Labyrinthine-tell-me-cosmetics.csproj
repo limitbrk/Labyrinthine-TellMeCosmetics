@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>Labyrinthine_TellMeCosmetics</AssemblyName>
+    <Product>Labyrinthine Mod: Tell Me Cosmetics</Product>
+    <Version>0.0.1</Version>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>TellMeCosmetics</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="LavaGang.MelonLoader" Version="0.6.5" />
+    <PackageReference Include="OpenMod.UnityEngine" Version="3.8.10" />
+    <PackageReference Include="Unity" Version="5.11.10" />
+    <Reference Include="Il2Cppmscorlib">
+      <HintPath>..\dlls\Il2Cppmscorlib.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppACTk.Runtime">
+      <HintPath>..\dlls\Il2CppACTk.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppInterop.Runtime">
+      <HintPath>..\dlls\Il2CppInterop.Runtime.dll</HintPath>
+    <!-- GAME SOURCE -->
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\dlls\Assembly-CSharp.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>
