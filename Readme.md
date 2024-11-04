@@ -2,7 +2,7 @@
 Display what cosmetics will be get in-game early.
 
 ## Download and Install
-- Download and install [MelonLoader](https://melonwiki.xyz/#/?id=manual-installation) manually.
+- Download and install MelonLoader (Stil use [Alpha-Dev build](https://nightly.link/LavaGang/MelonLoader/workflows/build/alpha-development)) manually.
 
 - Download latest [RELEASE]() zip
 - Extract and put folder `TellMeCosmetics` into the folder `Mods` in the game folder.
