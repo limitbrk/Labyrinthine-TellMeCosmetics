@@ -23,7 +23,7 @@ Please use at own Risk.
 Here for detail if you wanna continue my job ;)
 
 ### Dev Requirement
-- [MelonLoader](https://github.com/LavaGang/MelonLoader)
+- MelonLoader (Stil use [Alpha-Dev build](https://nightly.link/LavaGang/MelonLoader/workflows/build/alpha-development))
 - [UnityExplorer (Forked)](https://github.com/GrahamKracker/UnityExplorer) - Original not worked
 - [dnSpy](https://github.com/dnSpy/dnSpy)
 - .Net SDK 6.0
