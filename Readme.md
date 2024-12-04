@@ -11,21 +11,29 @@ Display what cosmetics will be get in-game early.
 **NO MUCH TEST**.
 Please use at own Risk.
 
+## Known Issue
+I'm not Unity developer but tried to searching solution
+- ~~(Fixed) Sometimes Crash~~
+- FrameDrop/Freezing sometime ( IDK how to search gameasset without performance drop )
+- MelonLoader Make SteamUI Bug ( wait they update -_- )
+
 ## Feature Plan
 - [x] **Display Case's Cosmetics item** - From ~~Cases board~~ Labyrinth Map
-- [ ] **Show Item Name**
+- [ ] **Show Item Name** - That really name not itemID
 - [ ] **Show Image of Cosmetics Item**
-- [ ] **Masked Locked Items** - Can be setting 
+- [ ] **Masked Locked Items** - For Non-OP mods
 - [ ] **(Opt.) Animation** - Fade in / out?
 - [ ] **(Opt.) Sound** - Reuse Game sound
+
+- [ ] **(Cancelled) GetItem from Lobby** - Know Item by seeds without loading world 
 
 ## For Mod Developer
 Here for detail if you wanna continue my job ;)
 
 ### Dev Requirement
-- MelonLoader (Stil use [Alpha-Dev build](https://nightly.link/LavaGang/MelonLoader/workflows/build/alpha-development))
-- [UnityExplorer (Forked)](https://github.com/GrahamKracker/UnityExplorer) - Original not worked
-- [dnSpy](https://github.com/dnSpy/dnSpy)
+- **ModLoader:** MelonLoader (Stil use [Alpha-Dev build](https://nightly.link/LavaGang/MelonLoader/workflows/build/alpha-development))
+- **AssetSearch:** [UnityExplorer (Forked)](https://github.com/GrahamKracker/UnityExplorer) - Original not worked
+- **RevEngCode:** [dnSpy](https://github.com/dnSpy/dnSpy)
 - .Net SDK 6.0
  
 ### Classes/Method
