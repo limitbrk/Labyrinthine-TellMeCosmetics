@@ -1,4 +1,4 @@
-using System.Collections;
+using Il2CppCharacterCustomization;
 using MelonLoader;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,21 +6,24 @@ using UnityEngine.UI;
 namespace TellMeCosmetics.UI;
 public class ItemAlertUI
 {
+    ItemsCollectionSO itemsCollectionSO;
     GameObject ui_object;
-    public ItemAlertUI(RectTransform tf) 
+    Text myText;
+
+    public ItemAlertUI(RectTransform parentUI, ItemsCollectionSO itemsCollectionSO) 
     {
+        this.itemsCollectionSO = itemsCollectionSO;
         // Create a new panel
         this.ui_object = new GameObject("ItemAlert UI");
         this.ui_object.SetActive(false);
-        this.ui_object.transform.SetParent(tf);
+        this.ui_object.transform.SetParent(parentUI);
 
-        Text myText;
-        myText = this.ui_object.AddComponent<Text>();
-        myText.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
-        myText.fontSize = 24;
+        this.myText = this.ui_object.AddComponent<Text>();
+        this.myText.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+        this.myText.fontSize = 24;
         // myText.color = new Color(1f, 1f, 1f, 0.75f);
-        myText.alignment = TextAnchor.MiddleLeft;
-        myText.horizontalOverflow = HorizontalWrapMode.Overflow;
+        this.myText.alignment = TextAnchor.MiddleLeft;
+        this.myText.horizontalOverflow = HorizontalWrapMode.Overflow;
 
         RectTransform rectTransform = this.ui_object.GetComponent<RectTransform>();
         rectTransform.anchorMin = new Vector2(0, 0);
@@ -29,21 +32,30 @@ public class ItemAlertUI
         rectTransform.anchoredPosition = new Vector2(10, 10);
     }
 
-    public void ShowUIwithCooldown(string itemname) 
+    public void Show(CustomizationPickup cosmetic) 
     {
         // Create a new panel
-        Text myText = this.ui_object.GetComponent<Text>();
-        if(myText == null){
-
+        if(this.ui_object == null && this.myText == null){
+            return;
         }
-        myText.text = itemname.Replace("(Clone)","");
+        if(this.itemsCollectionSO != null){
+            MelonLogger.Msg("Searching ITEM in collection");
+            itemsCollectionSO.TryGetItem(cosmetic.itemID, out CustomizationItem customItem);
+            MelonLogger.Msg("Found ITEM in collection");
+            this.myText.text = $"{cosmetic.itemID}: {customItem.Name}";
+        } else {
+            string filteredName = cosmetic.name.Replace("(Clone)","");
+            this.myText.text = $"{cosmetic.itemID}: {filteredName}";
+        }
         this.ui_object.SetActive(true);
-        MelonCoroutines.Start(SelfDestruct(this.ui_object));
     }
 
-    private static IEnumerator SelfDestruct(GameObject ui)
+    public void Clear() 
     {
-        yield return new WaitForSeconds(30f);
-        ui.SetActive(false);
+        if(this.ui_object == null && this.myText == null){
+            return;
+        }
+        this.ui_object.SetActive(false);
+        this.myText.text = null;
     }
 }

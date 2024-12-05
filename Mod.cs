@@ -15,7 +15,6 @@ namespace TellMeCosmetics;
 public class CustomizationPickupFinderMod : MelonMod
 {
     private ItemAlertUI alertui;
-    public static CustomizationPickup CustomizationPickup { get; set; }
 
     public override void OnInitializeMelon()
     {
@@ -24,39 +23,59 @@ public class CustomizationPickupFinderMod : MelonMod
 
     public override void OnSceneWasLoaded(int buildIndex, string sceneName)
     {
-        if (this.alertui == null) {
-            try {
-                RectTransform ui = GameObject.Find("Global/Global Canvas/Player_UI").GetComponent<RectTransform>();
-                if(ui != null) {
-                    LoggerInstance.Msg($"Initialization UI...");
-                    this.alertui = new ItemAlertUI(ui);
-                    LoggerInstance.Msg($"Created UI Successfully");
+        LoggerInstance.Msg($"Entering {buildIndex}/{sceneName}");
+
+        // Init UI
+        if (buildIndex >= 1 && sceneName == "MainMenu") {
+            if (this.alertui == null){
+                try {
+                    RectTransform ui = GameObject.Find("Global/Global Canvas/Player_UI/Tab Menu").GetComponent<RectTransform>();
+                    // still issue with = Method not found: 'UnityEngine.Object[] UnityEngine.Resources.FindObjectsOfTypeAll(System.Type)'.
+                    ItemsCollectionSO itemsCollectionSO = Resources.FindObjectsOfTypeAll<ItemsCollectionSO>()[0];
+                    if(itemsCollectionSO == null){
+                        LoggerInstance.Msg("Not Found itemsCollectionSO");
+                    }
+                    if(ui != null) {
+                        LoggerInstance.Msg($"Initialization UI...");
+                        this.alertui = new ItemAlertUI(ui, itemsCollectionSO);
+                        LoggerInstance.Msg($"Created UI Successfully");
+                    }
+                } 
+                catch (NullReferenceException e)
+                {
+                    LoggerInstance.Warning(e);
+                    // SKIP if null
                 }
-            } 
-            catch (NullReferenceException)
-            {
-                // SKIP if null
             }
         }
 
-        // Source of map name = Il2CppRandomGeneration.Contracts.MazeType
+        // Clear UI
+        if (this.alertui != null && buildIndex >= 3 && sceneName == "LoadingScreen"){
+            LoggerInstance.Msg($"Clearing UI when enter {sceneName}");
+            Thread t = new Thread(() =>
+            {
+                this.alertui.Clear();
+            });
+            t.Start();
+        }
+
+        // Change UI
         if (this.alertui != null && buildIndex >= 4 && sceneName.Contains("Maze"))
         {
             LoggerInstance.Msg($"Start Search in {sceneName}");
-            CustomizationPickup = null;
             Thread t = new Thread(() =>
             {
                 int tried = 0;
-                while (tried++ < 6)
+                while (tried++ < 5)
                 {
-                    CustomizationPickup = GameObject.FindObjectOfType<CustomizationPickup>();
-                    if (CustomizationPickup != null)
+                    CustomizationPickup customItem = GameObject.FindObjectOfType<CustomizationPickup>();
+                    if (customItem != null)
                     {
-                        LoggerInstance.Msg($"Found Cosmetic ItemID: ({CustomizationPickup.ItemID}){CustomizationPickup.name}");
-                        this.alertui.ShowUIwithCooldown(CustomizationPickup.name);
+                        LoggerInstance.Msg($"Found Cosmetic ItemID: ({customItem.ItemID}){customItem.name}");
+                        this.alertui.Show(customItem);
                         break;
 
-                        // This section try to get Item name/Item image
+                        // This section try to get Item name/Item image -- Blocked By ObsecureShort that make I cannot access
                         // RndInventoryManager inventory = GameObject.Find("Global/Rnd Inventory Manager").GetComponent<RndInventoryManager>();
                         // List<StoreCustomizationItemSO> items = inventory.GetItemsByIDs<StoreCustomizationItemSO>();
                         
