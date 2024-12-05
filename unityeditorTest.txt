@@ -1,0 +1,4 @@
+//Object itemsCollection = UnityEngine.Object.FindObjectsOfTypeAll(Il2CppInterop.Runtime.Il2CppType.Of<Il2CppCharacterCustomization.ItemsCollectionSO>())[0];
+Object itemsCollection = Resources.FindObjectsOfTypeAll<Il2CppCharacterCustomization.ItemsCollectionSO>()[0];
+Console.WriteLine(itemsCollection != null);
+itemsCollectionSO.TryGetItem(cosmetic.itemID, out CustomizationItem customItem);

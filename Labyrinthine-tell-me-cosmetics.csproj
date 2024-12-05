@@ -15,15 +15,15 @@
     <Reference Include="Il2Cppmscorlib">
       <HintPath>..\dlls\Il2Cppmscorlib.dll</HintPath>
     </Reference>
-    <Reference Include="Il2CppACTk.Runtime">
-      <HintPath>..\dlls\Il2CppACTk.Runtime.dll</HintPath>
-    </Reference>
     <Reference Include="Il2CppInterop.Runtime">
       <HintPath>..\dlls\Il2CppInterop.Runtime.dll</HintPath>
-    <!-- GAME SOURCE -->
     </Reference>
+    <!-- GAME SOURCE -->
     <Reference Include="Assembly-CSharp">
       <HintPath>..\dlls\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\libs\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

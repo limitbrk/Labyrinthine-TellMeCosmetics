@@ -30,14 +30,15 @@ public class CustomizationPickupFinderMod : MelonMod
             if (this.alertui == null){
                 try {
                     RectTransform ui = GameObject.Find("Global/Global Canvas/Player_UI/Tab Menu").GetComponent<RectTransform>();
-                    // still issue with = Method not found: 'UnityEngine.Object[] UnityEngine.Resources.FindObjectsOfTypeAll(System.Type)'.
-                    ItemsCollectionSO itemsCollectionSO = Resources.FindObjectsOfTypeAll<ItemsCollectionSO>()[0];
-                    if(itemsCollectionSO == null){
-                        LoggerInstance.Msg("Not Found itemsCollectionSO");
+                    // still issue with = Method not found: 'UnityEngine.Object[] UnityEngine.Resources.FindObjectsOfTypeAll(System.Type) InstanceID 76846'.
+                    // ItemsCollectionSO itemsCollection = AssetBundle.FindObjectOfTypeAll<Il2CppCharacterCustomization.ItemsCollectionSO>();
+                    ItemsCollectionSO itemsCollection = Resources.FindObjectsOfTypeAll<ItemsCollectionSO>()[0];
+                    if(itemsCollection != null){
+                        LoggerInstance.Msg("Found itemsCollectionSO");
                     }
                     if(ui != null) {
                         LoggerInstance.Msg($"Initialization UI...");
-                        this.alertui = new ItemAlertUI(ui, itemsCollectionSO);
+                        this.alertui = new ItemAlertUI(ui, itemsCollection);
                         LoggerInstance.Msg($"Created UI Successfully");
                     }
                 } 
