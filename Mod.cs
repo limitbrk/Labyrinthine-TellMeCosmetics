@@ -1,12 +1,14 @@
-﻿using MelonLoader;
-using UnityEngine;
+﻿using HarmonyLib;
+using MelonLoader;
+using System;
 using System.Threading;
+using UnityEngine;
 
 using Il2CppCharacterCustomization;
 
 using TellMeCosmetics;
 using TellMeCosmetics.UI;
-using System;
+using Il2CppValkoGames.Labyrinthine.Saves;
 
 [assembly: MelonInfo(typeof(CustomizationPickupFinderMod), "Tell Me Cosmetics", "0.0.1", "LimitBRK")]
 [assembly: MelonGame("Valko Game Studios", "Labyrinthine")]
@@ -14,10 +16,13 @@ using System;
 namespace TellMeCosmetics;
 public class CustomizationPickupFinderMod : MelonMod
 {
-    private ItemAlertUI alertui;
+
+    internal static CustomizationPickupFinderMod Instance { get; private set; }
+    internal ItemAlertUI alertui;
 
     public override void OnInitializeMelon()
     {
+        Instance = this; // Store a reference to the instance
         LoggerInstance.Msg($"TellMeCosmetics Mod Loaded!!!");
     }
 
@@ -59,33 +64,23 @@ public class CustomizationPickupFinderMod : MelonMod
             });
             t.Start();
         }
+    }
+}
 
-        // Change UI
-        if (this.alertui != null && buildIndex >= 4 && sceneName.Contains("Maze"))
+[HarmonyPatch(typeof(EquipmentSave), nameof(EquipmentSave.OnCaseCustomizationItemSpawned))]
+class CustomizationItemSpawnListener
+{
+    // Change UI
+    static void Postfix(ushort itemID){
+        MelonLogger.Msg($"Spawned Cosmetic ItemID {itemID}!!!");
+        // Access the mod instance and alertui to call Show
+        if (CustomizationPickupFinderMod.Instance?.alertui != null)
         {
-            LoggerInstance.Msg($"Start Search in {sceneName}");
-            Thread t = new Thread(() =>
-            {
-                int tried = 0;
-                while (tried++ < 5)
-                {
-                    CustomizationPickup customItem = GameObject.FindObjectOfType<CustomizationPickup>();
-                    if (customItem != null)
-                    {
-                        LoggerInstance.Msg($"Found Cosmetic ItemID: ({customItem.ItemID}){customItem.name}");
-                        this.alertui.Show(customItem);
-                        break;
-
-                        // This section try to get Item name/Item image -- Blocked By ObsecureShort that make I cannot access
-                        // RndInventoryManager inventory = GameObject.Find("Global/Rnd Inventory Manager").GetComponent<RndInventoryManager>();
-                        // List<StoreCustomizationItemSO> items = inventory.GetItemsByIDs<StoreCustomizationItemSO>();
-                        
-                    }
-                    LoggerInstance.Msg($"Not Found. Retry: {tried}");
-                    Thread.Sleep(5000);
-                }
-            });
-            t.Start();
+            CustomizationPickupFinderMod.Instance.alertui.Show(itemID);
+        }
+        else
+        {
+            MelonLogger.Warning("alertui is null or mod instance is not initialized!");
         }
     }
 }
