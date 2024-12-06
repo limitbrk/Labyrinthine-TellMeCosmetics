@@ -64,7 +64,7 @@ public class CustomizationPickupFinderMod : MelonMod
     }
 
     internal void Show(CustomizationPickup item) {
-        LoggerInstance.Msg($"Spawned Cosmetic ItemID {item.ItemID}!");
+        LoggerInstance.Msg($"Spawned Cosmetic ItemID {item.ItemID} {item.name}!");
         this.alertui?.Show(item);
     }
     

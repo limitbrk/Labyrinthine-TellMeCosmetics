@@ -25,6 +25,8 @@ I've not tested a joining lobbies method yet.
 ## Known Issues
 I'm not a Unity developer but I tried to search solution
 - MelonLoader launch game too long...
+- Disc show wrong itemname
+![bug01](docs/B01_Disc_no_icon.png.png)
 - ~~(Fixed) Sometimes Crash~~
 - ~~(Fixed) FrameDrop/Freezing sometimes when load map~~
 - ~~(Fixed in ML v0.6.6) MelonLoader Make SteamUI Bug~~
