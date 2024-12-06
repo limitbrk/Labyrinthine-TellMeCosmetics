@@ -3,7 +3,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <AssemblyName>Labyrinthine_TellMeCosmetics</AssemblyName>
     <Product>Labyrinthine Mod: Tell Me Cosmetics</Product>
-    <Version>0.0.1</Version>
+    <Version>0.0.4</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <RootNamespace>TellMeCosmetics</RootNamespace>

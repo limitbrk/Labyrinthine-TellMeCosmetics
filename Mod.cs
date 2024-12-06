@@ -10,7 +10,7 @@ using TellMeCosmetics;
 using TellMeCosmetics.UI;
 using Il2CppValkoGames.Labyrinthine.Saves;
 
-[assembly: MelonInfo(typeof(CustomizationPickupFinderMod), "Tell Me Cosmetics", "0.0.1", "LimitBRK")]
+[assembly: MelonInfo(typeof(CustomizationPickupFinderMod), "Tell Me Cosmetics", "0.0.4", "LimitBRK")]
 [assembly: MelonGame("Valko Game Studios", "Labyrinthine")]
 
 namespace TellMeCosmetics;
@@ -18,7 +18,8 @@ public class CustomizationPickupFinderMod : MelonMod
 {
 
     internal static CustomizationPickupFinderMod Instance { get; private set; }
-    internal ItemAlertUI alertui;
+    private ItemAlertUI alertui;
+    private bool cosmetics_ready;
 
     public override void OnInitializeMelon()
     {
@@ -60,27 +61,32 @@ public class CustomizationPickupFinderMod : MelonMod
             LoggerInstance.Msg($"Clearing UI when enter {sceneName}");
             Thread t = new Thread(() =>
             {
+                this.cosmetics_ready = false;
                 this.alertui.Clear();
             });
             t.Start();
         }
+
+        // Clear UI
+        if (this.alertui != null && buildIndex >= 4 && sceneName.StartsWith("Rand_Maze")){
+            this.cosmetics_ready = true;
+        }
     }
+
+    internal void Show(ushort itemID) {
+        LoggerInstance.Msg($"Spawned Cosmetic ItemID {itemID}!!! {cosmetics_ready}");
+        if(this.alertui != null && this.cosmetics_ready){
+            this.alertui.Show(itemID);
+        }
+    }
+    
 }
 
-[HarmonyPatch(typeof(EquipmentSave), nameof(EquipmentSave.OnCaseCustomizationItemSpawned))]
+[HarmonyPatch(typeof(RndCustomizationSpawner), nameof(RndCustomizationSpawner.Spawn))]
 class CustomizationItemSpawnListener
 {
-    // Change UI
-    static void Postfix(ushort itemID){
-        MelonLogger.Msg($"Spawned Cosmetic ItemID {itemID}!!!");
-        // Access the mod instance and alertui to call Show
-        if (CustomizationPickupFinderMod.Instance?.alertui != null)
-        {
-            CustomizationPickupFinderMod.Instance.alertui.Show(itemID);
-        }
-        else
-        {
-            MelonLogger.Warning("alertui is null or mod instance is not initialized!");
-        }
+    static void Postfix(ref GameObject ___spawned){
+        CustomizationPickup item = ___spawned.GetComponent<CustomizationPickup>();
+        CustomizationPickupFinderMod.Instance?.Show(item.ItemID);
     }
 }
