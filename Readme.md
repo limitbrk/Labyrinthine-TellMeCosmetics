@@ -5,7 +5,7 @@
 ## Get Started
 - Download and install [MelonLoader](https://melonwiki.xyz) (Stil use [Alpha-Dev build](https://nightly.link/LavaGang/MelonLoader/workflows/build/alpha-development)) manually.
 
-- Download latest [RELEASE]() zip
+- Download latest [RELEASE](/releases) zip
 - Extract and put folder `TellMeCosmetics` into the folder `Mods` in the game folder.
 
 ## Disclaimer
