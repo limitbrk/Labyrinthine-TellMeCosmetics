@@ -4,18 +4,18 @@
 
 ## Get Started
 - Download and install [MelonLoader](https://melonwiki.xyz) (Must v0.6.6+)
-- Download the latest mod `.dll` [RELEASE](https://github.com/limitbrk/Labyrinthine-TellMeCosmetics/releases/latest) (Recommend v0.0.3+)
+- Download the latest mod `.dll` [RELEASE](https://github.com/limitbrk/Labyrinthine-TellMeCosmetics/releases/latest) (Recommend v0.0.4+)
 - Copy `.dll` into the folder `Mods` in the game folder.
 
 ## Modded Status
-**ONLY Tested on Windows 11 Intelx64** 
+**ONLY Tested on Windows 11 AMDx64** 
 
 I've not tested a joining lobbies method yet.
 
 ## Features Plan
 - [x] **Display Case's Cosmetics item** - From ~~Cases board~~ Labyrinth Map
 - [x] **Show Item Name** - That really name not itemID
-- [x] **Show Image of Cosmetics Item** - item name don't know how it's look
+- [x] **Show Image of Cosmetics Item** - only item name don't know how it's look
 - [ ] **Tweak UI** - more readable
 - [ ] **Masked Locked Items** - For Non-OP mods
 - [ ] **(Opt.) Animation** - Fade in / out?
@@ -24,8 +24,9 @@ I've not tested a joining lobbies method yet.
 
 ## Known Issues
 I'm not a Unity developer but I tried to search solution
+- MelonLoader launch game too long...
 - ~~(Fixed) Sometimes Crash~~
-- ~~(Fixed) FrameDrop/Freezing sometimes when load~~
+- ~~(Fixed) FrameDrop/Freezing sometimes when load map~~
 - ~~(Fixed in ML v0.6.6) MelonLoader Make SteamUI Bug~~
 
 &nbsp;

@@ -55,20 +55,23 @@ public class ItemAlertUI
         this.myText.horizontalOverflow = HorizontalWrapMode.Overflow;
     }
 
-    public void Show(ushort itemID) 
+    public void Show(CustomizationPickup item) 
     {
         // Check if components are initialized
         if (this.ui_object == null || this.myText == null || this.iconImage == null) return;
 
         if(this.itemsCollection != null && itemsCollection.Length >= 0){
-            if (itemID >= itemsCollection.Length){
+            if (item.ItemID >= itemsCollection.Length){
                 throw new Exception("Out of itemID index to search");
             }
             // DEV Still use array index as itemId
-            this.iconImage.sprite = this.itemsCollection[itemID].icon;
-            this.myText.text = $"#{itemID} {itemsCollection[itemID].icon.name.Replace("_"," ")}({itemsCollection[itemID].ItemRarity})";
-            this.ui_object.SetActive(true);
+            this.iconImage.sprite = this.itemsCollection[item.ItemID].icon;
+            this.myText.text = $"#{item.ItemID} {itemsCollection[item.ItemID].icon.name.Replace("_"," ")}({itemsCollection[item.ItemID].ItemRarity})";
+        } else {
+            this.iconImage.sprite = null;
+            this.myText.text = $"#{item.ItemID} {FilterClone(item.name)}";
         }
+        this.ui_object.SetActive(true);
     }
 
     public void Clear() 
@@ -79,12 +82,17 @@ public class ItemAlertUI
         this.myText.text = string.Empty;
     }
 
+    public bool isDestroy() 
+    {
+        return this.ui_object == null;
+    }
+
     private static string FilterClone(string name)
         {
             const string cloneSuffix = "(Clone)";
             if (name.EndsWith(cloneSuffix))
             {
-                return name[..^cloneSuffix.Length];
+                return name[..^cloneSuffix.Length].Replace("_"," ");
             }
             return name;
         }
