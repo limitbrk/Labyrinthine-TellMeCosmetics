@@ -3,19 +3,14 @@
 ![mod example](docs/Mod_Example.png)
 
 ## Get Started
-- Download and install [MelonLoader](https://melonwiki.xyz) (Stil use [Alpha-Dev build](https://nightly.link/LavaGang/MelonLoader/workflows/build/alpha-development)) manually.
-
-- Download the latest mod `.dll` [RELEASE](https://github.com/limitbrk/Labyrinthine-TellMeCosmetics/releases/latest)
+- Download and install [MelonLoader](https://melonwiki.xyz) (Must v0.6.6+)
+- Download the latest mod `.dll` [RELEASE](https://github.com/limitbrk/Labyrinthine-TellMeCosmetics/releases/latest) (Recommend v0.0.3+)
 - Copy `.dll` into the folder `Mods` in the game folder.
 
-## Disclaimer
-**ONLY Tested on Windows 11 Intelx64**
+## Modded Status
+**ONLY Tested on Windows 11 Intelx64** 
 
-## Known Issues
-I'm not a Unity developer but I tried to search solution
-- ~~(Fixed) Sometimes Crash~~
-- FrameDrop/Freezing sometimes ( IDK how to search GameObject without performance drop )
-- MelonLoader Make SteamUI Bug ( wait they update -_- )
+I've not tested a joining lobbies method yet.
 
 ## Features Plan
 - [x] **Display Case's Cosmetics item** - From ~~Cases board~~ Labyrinth Map
@@ -27,6 +22,13 @@ I'm not a Unity developer but I tried to search solution
 - [ ] **(Opt.) Sound** - Reuse Game sound
 - [ ] **(Cancelled) GetItem from Lobby** - Know Item by seeds without loading world _(too hard for me)_
 
+## Known Issues
+I'm not a Unity developer but I tried to search solution
+- ~~(Fixed) Sometimes Crash~~
+- ~~(Fixed) FrameDrop/Freezing sometimes when load~~
+- ~~(Fixed in ML v0.6.6) MelonLoader Make SteamUI Bug~~
+
+&nbsp;
 &nbsp;
 # For Mod Developer
 Here are details if you want to continue my job ;)
