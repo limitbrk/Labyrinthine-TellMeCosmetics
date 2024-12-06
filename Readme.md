@@ -1,6 +1,6 @@
 # Labyrinthine - Tell Me Cosmetics
 `Press Tab` to display what cosmetics will get in-game.
-![mod example](docs/Mod_Example.png)
+![mod example](docs/Mod_Example1.png)
 
 ## Get Started
 - Download and install [MelonLoader](https://melonwiki.xyz) (Must v0.6.6+)
@@ -25,7 +25,7 @@ I've not tested a joining lobbies method yet.
 ## Known Issues
 I'm not a Unity developer but I tried to search solution
 - MelonLoader launch game too long...
-- Disc show wrong itemname
+- ~~(Fixed) Disc show wrong itemname~~
 ![bug01](docs/B01_Disc_no_icon.png)
 - ~~(Fixed) Sometimes Crash~~
 - ~~(Fixed) FrameDrop/Freezing sometimes when load map~~

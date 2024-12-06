@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Il2CppCharacterCustomization;
 using MelonLoader;
 using UnityEngine;
@@ -65,8 +66,9 @@ public class ItemAlertUI
                 throw new Exception("Out of itemID index to search");
             }
             // DEV Still use array index as itemId
-            this.iconImage.sprite = this.itemsCollection[item.ItemID].icon;
-            this.myText.text = $"#{item.ItemID} {itemsCollection[item.ItemID].icon.name.Replace("_"," ")}({itemsCollection[item.ItemID].ItemRarity})";
+            CustomizationItem itemData = this.itemsCollection[item.ItemID];
+            this.iconImage.sprite = itemData.icon;
+            this.myText.text = $"#{item.ItemID} {(!string.IsNullOrEmpty(itemData.Name) ? itemData.Name : itemData.icon.name).Replace("_"," ")} ({itemData.ItemRarity})";
         } else {
             this.iconImage.sprite = null;
             this.myText.text = $"#{item.ItemID} {FilterClone(item.name)}";
