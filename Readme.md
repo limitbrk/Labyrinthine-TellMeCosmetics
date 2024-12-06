@@ -1,26 +1,26 @@
 # Labyrinthine - Tell Me Cosmetics
-`Press Tab` to Display what cosmetics will be get in-game.
+`Press Tab` to display what cosmetics will get in-game.
 ![mod example](docs/Mod_Example.png)
 
 ## Get Started
 - Download and install [MelonLoader](https://melonwiki.xyz) (Stil use [Alpha-Dev build](https://nightly.link/LavaGang/MelonLoader/workflows/build/alpha-development)) manually.
 
-- Download latest [RELEASE](https://github.com/limitbrk/Labyrinthine-TellMeCosmetics/releases/latest) zip
-- Extract and put folder `TellMeCosmetics` into the folder `Mods` in the game folder.
+- Download the latest mod `.dll` [RELEASE](https://github.com/limitbrk/Labyrinthine-TellMeCosmetics/releases/latest)
+- Copy `.dll` into the folder `Mods` in the game folder.
 
 ## Disclaimer
 **ONLY Tested on Windows 11 Intelx64**
 
 ## Known Issues
-I'm not Unity developer but tried to searching solution
+I'm not a Unity developer but I tried to search solution
 - ~~(Fixed) Sometimes Crash~~
-- FrameDrop/Freezing sometime ( IDK how to search gameobject without performance drop )
+- FrameDrop/Freezing sometimes ( IDK how to search GameObject without performance drop )
 - MelonLoader Make SteamUI Bug ( wait they update -_- )
 
 ## Features Plan
 - [x] **Display Case's Cosmetics item** - From ~~Cases board~~ Labyrinth Map
 - [x] **Show Item Name** - That really name not itemID
-- [x] **Show Image of Cosmetics Item** - some name don't know it's look like
+- [x] **Show Image of Cosmetics Item** - item name don't know how it's look
 - [ ] **Tweak UI** - more readable
 - [ ] **Masked Locked Items** - For Non-OP mods
 - [ ] **(Opt.) Animation** - Fade in / out?
@@ -29,7 +29,7 @@ I'm not Unity developer but tried to searching solution
 
 &nbsp;
 # For Mod Developer
-Here for detail if you wanna continue my job ;)
+Here are details if you want to continue my job ;)
 
 ## Dev Requirement
 - **ModLoader:** MelonLoader (Stil use [Alpha-Dev build](https://nightly.link/LavaGang/MelonLoader/workflows/build/alpha-development))
@@ -45,7 +45,7 @@ Here for detail if you wanna continue my job ;)
 - SecondSeed
 - ExcludedCustomizationItemIDs
 
-*** Cannot Find Cosmetics selection logic yet. (Behavior - **Re-Enter** map will same spawned)
+*** Not found cosmetics selection logic from seed yet. (Behavior - **Re-Enter** map will same spawned)
 
 ### Cosmetic Item (Lobby)
 `Il2CppCharacterCustomization.CustomizationItem`
