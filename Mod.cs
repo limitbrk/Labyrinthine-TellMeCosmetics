@@ -18,9 +18,17 @@ public class CustomizationPickupFinderMod : MelonMod
 
     internal static CustomizationPickupFinderMod Instance { get; private set; }
     private ItemAlertUI alertui;
+    
+    // Settings
+    private MelonPreferences_Category category_mod;
+    private MelonPreferences_Entry<bool> entry_revealall;
 
     public override void OnInitializeMelon()
     {
+        category_mod = MelonPreferences.CreateCategory("Gameplay");
+        category_mod.SetFilePath("Mods/TellMeCosmetics_config.cfg");
+        entry_revealall = category_mod.CreateEntry<bool>("RevealAllItems", false);
+
         Instance = this; // Store a reference to the instance
         LoggerInstance.Msg($"TellMeCosmetics Mod Loaded!!!");
     }
@@ -75,6 +83,8 @@ class CustomizationItemSpawnListener
 {
     static void Postfix(){
         CustomizationPickup item = GameObject.FindObjectOfType<CustomizationPickup>(); 
+        // Todo Get Unlocked form save
+        CustomizationSave savedata = GameObject.Find("Player(Clone)")?.GetComponent<CustomizationManager>()?.CustomizationSave;
         CustomizationPickupFinderMod.Instance?.Show(item);
     }
 }

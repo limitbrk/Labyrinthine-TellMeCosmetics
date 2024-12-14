@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <AssemblyName>Labyrinthine_TellMeCosmetics</AssemblyName>
+    <AssemblyName>TellMeCosmetics</AssemblyName>
     <Product>Labyrinthine Mod: Tell Me Cosmetics</Product>
     <Version>0.0.4</Version>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- <AllowUnsafeBlocks>true</AllowUnsafeBlocks> -->
     <LangVersion>latest</LangVersion>
     <RootNamespace>TellMeCosmetics</RootNamespace>
   </PropertyGroup>
@@ -18,12 +18,15 @@
     <Reference Include="Il2CppInterop.Runtime">
       <HintPath>..\dlls\Il2CppInterop.Runtime.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\libs\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>..\dlls\Unity.TextMeshPro.dll</HintPath>
+    </Reference>
     <!-- GAME SOURCE -->
     <Reference Include="Assembly-CSharp">
       <HintPath>..\dlls\Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\libs\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>
