@@ -1,13 +1,26 @@
 # Labyrinthine - Tell Me Cosmetics
 `Press Tab` to display what cosmetics will get in-game.
+### Case: Discovered item
 ![mod example](docs/Mod_Example1.png)
+### Case: Discovered music item
+![mod example](docs/Mod_Example3_Music.png)
+### Case: Undiscovered item when `RevealAllItems=false`
+![mod example](docs/Mod_Example2_Undiscovered.png)
 
 ## Get Started
 - Download and install [MelonLoader](https://melonwiki.xyz) (Must v0.6.6+)
-- Download the latest mod `.dll` [RELEASE](https://github.com/limitbrk/Labyrinthine-TellMeCosmetics/releases/latest) (Recommend v0.0.4+)
+- Download the latest mod `.dll` [RELEASE](https://github.com/limitbrk/Labyrinthine-TellMeCosmetics/releases/latest) (Recommend v0.1.0+)
 - Copy `.dll` into the folder `Mods` in the game folder.
 
-## Modded Status
+## Mod Setting
+When game started onces. Please close game. Then file `Mods/TellMeCosmetics_config.cfg` will created with these setting
+```ini
+[Gameplay]
+RevealAllItems = false
+```
+- `RevealAllItems`: Show every item name include undiscovered (Default is `false`)
+
+## Mod Status
 **ONLY Tested on Windows 11 AMDx64** 
 
 I've not tested a joining lobbies method yet.
@@ -16,11 +29,11 @@ I've not tested a joining lobbies method yet.
 - [x] **Display Case's Cosmetics item** - From ~~Cases board~~ Labyrinth Map
 - [x] **Show Item Name** - That really name not itemID
 - [x] **Show Image of Cosmetics Item** - only item name don't know how it's look
-- [ ] **Tweak UI** - more readable
-- [ ] **Masked Locked Items** - For Non-OP mods
-- [ ] **(Opt.) Animation** - Fade in / out?
-- [ ] **(Opt.) Sound** - Reuse Game sound
-- [ ] **(Cancelled) GetItem from Lobby** - Know Item by seeds without loading world _(too hard for me)_
+- [X] **Masked Locked Items** - For Non-OP mods
+- [ ] **Mark UI when picked up** - For who too
+- ~~**(Cancelled) Tweak UI** - more readable~~ _(I'm lack Unity UI skill to made this)_
+- ~~**(Cancelled) Animation** - Fade in / out?~~ 
+- ~~**(Cancelled) GetItem from Lobby** - Know Item by seeds without loading world~~ _(too hard for me)_
 
 ## Known Issues
 I'm not a Unity developer but I tried to search solution

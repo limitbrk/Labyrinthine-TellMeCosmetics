@@ -64,37 +64,40 @@ public class ItemAlertUI
         this.myText.overflowMode = TextOverflowModes.Overflow;
     }
 
-    public void Show(CustomizationPickup item) 
+    public void Show(CustomizationPickup item, bool reveal = true) 
     {
         // Check if components are initialized
         if (this.ui_object == null || this.myText == null || this.iconImage == null) return;
 
-        if(this.itemsCollection != null && itemsCollection.Length >= 0){
+        if (!reveal) {
+            this.SetItemUI(null, $"? Undiscovered Item");
+        } else if (this.itemsCollection != null && itemsCollection.Length >= 0){
             if (item.ItemID >= itemsCollection.Length){
                 throw new Exception("Out of itemID index to search");
             }
             // DEV Still use array index as itemId
             CustomizationItem itemData = this.itemsCollection[item.ItemID];
-            // Add Asset
-            switch (itemData.BodyPart){
-                case BodyPart.Music:
-                    this.iconImage.sprite = itemData.BodyPart != BodyPart.Music ? itemData.Icon : null;
-                    this.iconObject.SetActive(false);
-                    break;
-                default:
-                    this.iconImage.sprite = itemData.Icon;
-                    this.iconObject.SetActive(itemData.Icon != null);
-                    break;
-            }
-            this.myText.text = ""
-                + (itemData.BodyPart == BodyPart.Music ? "♫ " : "")
+            string basedItemDataname = ""
                 + $"#{item.ItemID} "
                 + $"{(!string.IsNullOrEmpty(itemData.Name) ? itemData.Name : itemData.icon.name).Replace("_"," ")} "
                 + $"({itemData.ItemRarity})";
+            switch (itemData.BodyPart){
+                case BodyPart.Music:
+                    this.SetItemUI(null, $"♫ {basedItemDataname}");
+                    break;
+                default:
+                    this.SetItemUI(itemData.Icon, basedItemDataname);
+                    break;
+            }
         } else {
-            this.iconImage.sprite = null; 
-            this.myText.text = $"#{item.ItemID} {FilterClone(item.name)}";
+            this.SetItemUI(null, $"#{item.ItemID} {FilterClone(item.name)}");
         }
+    }
+
+    private void SetItemUI(Sprite itemSprite, string itemText){
+        this.iconImage.sprite = itemSprite; 
+        this.iconObject.SetActive(itemSprite != null);
+        this.myText.text = itemText;
         this.ui_object.SetActive(true);
     }
 
@@ -112,12 +115,12 @@ public class ItemAlertUI
     }
 
     private static string FilterClone(string name)
+    {
+        const string cloneSuffix = "(Clone)";
+        if (name.EndsWith(cloneSuffix))
         {
-            const string cloneSuffix = "(Clone)";
-            if (name.EndsWith(cloneSuffix))
-            {
-                return name[..^cloneSuffix.Length].Replace("_"," ");
-            }
-            return name;
+            return name[..^cloneSuffix.Length].Replace("_"," ");
         }
+        return name;
+    }
 }

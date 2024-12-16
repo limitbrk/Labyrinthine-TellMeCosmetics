@@ -9,16 +9,16 @@ using Il2CppCharacterCustomization;
 using TellMeCosmetics;
 using TellMeCosmetics.UI;
 
-[assembly: MelonInfo(typeof(CustomizationPickupFinderMod), "Tell Me Cosmetics", "0.0.4", "LimitBRK")]
+[assembly: MelonInfo(typeof(CustomizationPickupFinderMod), "Tell Me Cosmetics", "0.1.0", "LimitBRK")]
 [assembly: MelonGame("Valko Game Studios", "Labyrinthine")]
 
 namespace TellMeCosmetics;
 public class CustomizationPickupFinderMod : MelonMod
 {
-
     internal static CustomizationPickupFinderMod Instance { get; private set; }
+    private CustomizationSave SaveInstance;
     private ItemAlertUI alertui;
-    
+
     // Settings
     private MelonPreferences_Category category_mod;
     private MelonPreferences_Entry<bool> entry_revealall;
@@ -72,10 +72,19 @@ public class CustomizationPickupFinderMod : MelonMod
     }
 
     internal void Show(CustomizationPickup item) {
+        // Intended to not hide itemname in log 
         LoggerInstance.Msg($"Spawned Cosmetic ItemID {item.ItemID} {item.name}!");
-        this.alertui?.Show(item);
+        if (!this.entry_revealall.Value && this.SaveInstance != null) {
+            this.alertui?.Show(item, reveal: this.SaveInstance.IsItemUnlocked(item.ItemID));
+        } else {
+            this.alertui?.Show(item);
+        }
     }
+
     
+    internal void UpdateSave(CustomizationSave save) {
+        if(save != null) this.SaveInstance = save;
+    }
 }
 
 [HarmonyPatch(typeof(RndCustomizationSpawner), nameof(RndCustomizationSpawner.Spawn))]
@@ -83,8 +92,15 @@ class CustomizationItemSpawnListener
 {
     static void Postfix(){
         CustomizationPickup item = GameObject.FindObjectOfType<CustomizationPickup>(); 
-        // Todo Get Unlocked form save
-        CustomizationSave savedata = GameObject.Find("Player(Clone)")?.GetComponent<CustomizationManager>()?.CustomizationSave;
         CustomizationPickupFinderMod.Instance?.Show(item);
+    }
+}
+
+[HarmonyPatch(typeof(CustomizationSave), nameof(CustomizationSave.Load))]
+class CustomizationSaveLoadListener
+{
+    static void Postfix(CustomizationSave __result){
+        // CustomizationSave IntPtr not always same
+        CustomizationPickupFinderMod.Instance?.UpdateSave(__result);
     }
 }
