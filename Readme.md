@@ -3,7 +3,7 @@
 ### Case: Discovered item
 ![mod example](docs/Mod_Example1.png)
 ### Case: Discovered music item
-![mod example](docs/Mod_Example3_Music.png)
+![mod example](docs/Mod_Example3_MusicDisc.png)
 ### Case: Undiscovered item when `RevealAllItems=false`
 ![mod example](docs/Mod_Example2_Undiscovered.png)
 ### Case: When picked up
