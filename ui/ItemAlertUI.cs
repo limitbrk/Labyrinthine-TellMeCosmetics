@@ -9,20 +9,25 @@ namespace TellMeCosmetics.UI;
 public class ItemAlertUI
 {
     private readonly CustomizationItem[] itemsCollection;
-    private readonly GameObject ui_object;
     private readonly TMP_FontAsset fontref;
 
-    // UI Instance 
+    // UI Instances
+    private readonly GameObject ui_object;
     private readonly TextMeshProUGUI myText;
     private readonly GameObject iconObject;
     private readonly Image iconImage;
+    private readonly GameObject iconAltObject;
+    private readonly TextMeshProUGUI iconAltImage;
+
+    // Value 
+    private ushort itemID;
 
     public ItemAlertUI(RectTransform parentUI, ItemsCollectionSO itemsCollectionSO) 
     {
         this.fontref = parentUI.Find("Ping Text")?.GetComponent<TextMeshProUGUI>()?.font;
         
         // TODO: more readable UI
-        this.itemsCollection = itemsCollectionSO.collection;
+        this.itemsCollection = itemsCollectionSO?.collection;
         MelonLogger.Msg($"Loaded {this.itemsCollection.Length} cosmetic assets!");
 
         // Create a new panel
@@ -53,6 +58,18 @@ public class ItemAlertUI
         this.iconImage.sprite = null;
         RectTransform imageRect = this.iconObject.GetComponent<RectTransform>();
         imageRect.sizeDelta = new Vector2(64, 64);
+
+        this.iconAltObject = new("Item Icon Alt");
+        this.iconAltObject.transform.SetParent(this.ui_object.transform, false);
+        this.iconAltObject.SetActive(false);
+        this.iconAltImage = this.iconAltObject.AddComponent<TextMeshProUGUI>();
+        this.iconAltImage.font = fontref;
+        this.iconAltImage.fontSize = 60;
+        this.iconAltImage.richText = false;
+        this.iconAltImage.fontWeight = FontWeight.Black;
+        this.iconAltImage.alignment = TextAlignmentOptions.Midline;
+        RectTransform imageAltRect = this.iconAltObject.GetComponent<RectTransform>();
+        imageAltRect.sizeDelta = new Vector2(64, 64);
         
         // Add Text component for displaying item name
         GameObject textObject = new("Item Name");
@@ -60,56 +77,78 @@ public class ItemAlertUI
         this.myText = textObject.AddComponent<TextMeshProUGUI>();
         this.myText.font = fontref;
         this.myText.fontSize = 36;
+        this.myText.richText = false;
         this.myText.alignment = TextAlignmentOptions.MidlineLeft;
         this.myText.overflowMode = TextOverflowModes.Overflow;
     }
 
+    private void SetItemUI(string itemText, Sprite icon = null, char altIcon = '?'){
+        this.myText.text = itemText;
+        this.myText.fontStyle = FontStyles.Normal;
+
+        this.iconImage.sprite = icon; 
+        this.iconObject.SetActive(icon != null);
+
+        this.iconAltImage.text = (icon == null) ? altIcon.ToString() : string.Empty; 
+        this.iconAltObject.SetActive(icon == null);
+
+        this.ui_object.SetActive(true);
+    }
+    
     public void Show(CustomizationPickup item, bool reveal = true) 
     {
+        this.itemID = item.ItemID;
         // Check if components are initialized
         if (this.ui_object == null || this.myText == null || this.iconImage == null) return;
 
         if (!reveal) {
-            this.SetItemUI(null, $"? Undiscovered Item");
+            this.SetItemUI("Undiscovered Item");
         } else if (this.itemsCollection != null && itemsCollection.Length >= 0){
-            if (item.ItemID >= itemsCollection.Length){
+            if (this.itemID >= itemsCollection.Length){
                 throw new Exception("Out of itemID index to search");
             }
             // DEV Still use array index as itemId
-            CustomizationItem itemData = this.itemsCollection[item.ItemID];
+            CustomizationItem itemData = this.itemsCollection[this.itemID];
             string basedItemDataname = ""
-                + $"#{item.ItemID} "
+                + $"#{this.itemID} "
                 + $"{(!string.IsNullOrEmpty(itemData.Name) ? itemData.Name : itemData.icon.name).Replace("_"," ")} "
                 + $"({itemData.ItemRarity})";
             switch (itemData.BodyPart){
                 case BodyPart.Music:
-                    this.SetItemUI(null, $"♫ {basedItemDataname}");
+                    this.SetItemUI(basedItemDataname, altIcon: '♫');
                     break;
                 default:
-                    this.SetItemUI(itemData.Icon, basedItemDataname);
+                    this.SetItemUI(basedItemDataname, itemData.Icon);
                     break;
             }
         } else {
-            this.SetItemUI(null, $"#{item.ItemID} {FilterClone(item.name)}");
+            this.SetItemUI($"#{this.itemID} {FilterClone(item.name)}");
         }
     }
 
-    private void SetItemUI(Sprite itemSprite, string itemText){
-        this.iconImage.sprite = itemSprite; 
-        this.iconObject.SetActive(itemSprite != null);
-        this.myText.text = itemText;
-        this.ui_object.SetActive(true);
+    public void Pickup(ushort itemID){
+        if (this.itemID == itemID) {
+            MelonLogger.Msg("Picked item up");
+            this.myText.fontStyle = FontStyles.Strikethrough;
+        }
     }
 
     public void Clear() 
     {
         if(this.ui_object == null || this.myText == null) return; 
         this.ui_object.SetActive(false);
-        this.iconImage.sprite = null;  // Clear the icon
+        
         this.myText.text = string.Empty;
+        this.myText.fontStyle = FontStyles.Normal;
+
+        this.iconImage.sprite = null;  // Clear the icon
+        this.iconObject.SetActive(false);
+
+        this.iconAltImage.text = string.Empty; 
+        this.iconAltObject.SetActive(false);
     }
 
-    public bool isDestroy() 
+    public bool IsDestroy() 
     {
         return this.ui_object == null;
     }

@@ -39,7 +39,7 @@ public class CustomizationPickupFinderMod : MelonMod
 
         // Init UI
         if (buildIndex >= 1 && sceneName == "MainMenu") {
-            if (this.alertui == null || this.alertui.isDestroy()){
+            if (this.alertui == null || this.alertui.IsDestroy()){
                 try {
                     RectTransform ui = GameObject.Find("Global/Global Canvas/Player_UI/Tab Menu").GetComponent<RectTransform>();
                     ItemsCollectionSO itemsCollection = Resources.FindObjectsOfTypeAll<ItemsCollectionSO>()[0];
@@ -81,6 +81,10 @@ public class CustomizationPickupFinderMod : MelonMod
         }
     }
 
+    internal void Pickup(ushort itemID) {
+        this.alertui?.Pickup(itemID);
+    }
+
     
     internal void UpdateSave(CustomizationSave save) {
         if(save != null) this.SaveInstance = save;
@@ -100,7 +104,15 @@ class CustomizationItemSpawnListener
 class CustomizationSaveLoadListener
 {
     static void Postfix(CustomizationSave __result){
-        // CustomizationSave IntPtr not always same
+        // CustomizationSave IntPtr always change
         CustomizationPickupFinderMod.Instance?.UpdateSave(__result);
+    }
+}
+
+[HarmonyPatch(typeof(CustomizationPickup), nameof(CustomizationPickup.Pickup))]
+class CustomizationPickupPickupListener
+{
+    static void Postfix(CustomizationPickup __instance){
+        CustomizationPickupFinderMod.Instance?.Pickup(__instance.ItemID);
     }
 }
