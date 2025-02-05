@@ -37,8 +37,6 @@ RevealAllItems = false
 ## Mod Status
 **ONLY Tested on Windows 11 AMDx64** 
 
-I've not tested a joining lobbies method yet.
-
 ## Features Plan
 - [x] **Display Case's Cosmetics item** - From ~~Cases board~~ Labyrinth Map
 - [x] **Show Item Name** - That really name not itemID
