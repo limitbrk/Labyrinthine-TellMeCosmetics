@@ -11,7 +11,7 @@
 
 
 ## Get Started
-1. Download and install [MelonLoader](https://melonwiki.xyz) (Must v0.6.6+)
+1. Download and install [MelonLoader](https://melonwiki.xyz) (Must v0.7.0+)
 2. Download the latest mod `.dll` [RELEASE](https://github.com/limitbrk/Labyrinthine-TellMeCosmetics/releases/latest) (Recommend v0.1.0+)
 3. Copy `.dll` into the folder `Mods` in the game folder.
 
@@ -50,6 +50,7 @@ RevealAllItems = false
 ## Known Issues
 I'm not a Unity developer but I tried to search solution
 - MelonLoader launch game too long...
+- Sometimes game launched without Mod's UI
 - ~~(Fixed) Disc show wrong itemname~~
 ![bug01](docs/B01_Disc_no_icon.png)
 - ~~(Fixed) Sometimes Crash~~
