@@ -8,8 +8,9 @@ using Il2CppCharacterCustomization;
 
 using TellMeCosmetics;
 using TellMeCosmetics.UI;
+using Unity;
 
-[assembly: MelonInfo(typeof(CustomizationPickupFinderMod), "Tell Me Cosmetics", "0.1.0", "LimitBRK")]
+[assembly: MelonInfo(typeof(CustomizationPickupFinderMod), "Tell Me Cosmetics", "0.1.1", "LimitBRK")]
 [assembly: MelonGame("Valko Game Studios", "Labyrinthine")]
 
 namespace TellMeCosmetics;
@@ -17,6 +18,7 @@ public class CustomizationPickupFinderMod : MelonMod
 {
     internal static CustomizationPickupFinderMod Instance { get; private set; }
     private CustomizationSave SaveInstance;
+    private ItemsCollectionSO itemsCollection;
     private ItemAlertUI alertui;
 
     // Settings
@@ -35,9 +37,31 @@ public class CustomizationPickupFinderMod : MelonMod
 
     public override void OnSceneWasLoaded(int buildIndex, string sceneName)
     {
-        LoggerInstance.Msg($"Entering {buildIndex}/{sceneName}");
+        LoggerInstance.Msg($"SCENE {buildIndex}/{sceneName} Loaded!");
+        if (this.itemsCollection == null){
+            ItemsCollectionSO[] ic = Resources.FindObjectsOfTypeAll<ItemsCollectionSO>();
+            if(ic.Length > 0){
+                this.itemsCollection = ic[0];
+                LoggerInstance.Msg("Init itemsCollectionSO Class");
+            }
+        }
 
-        // Init UI
+        // Clear UI
+        if (buildIndex >= 3 && sceneName == "LoadingScreen"){
+            LoggerInstance.Msg($"Clearing UI when enter {sceneName}");
+            Thread t = new(() =>
+            {
+                this.alertui?.Clear();
+            });
+            t.Start();
+        }
+    }
+
+    public override void OnSceneWasInitialized(int buildIndex, string sceneName)
+    {
+        LoggerInstance.Msg($"SCENE {buildIndex}/{sceneName} Initialized!");
+        // Init UI 
+        // TODO: Why MainMenu loaded twice? So we go twice as them want
         if (buildIndex >= 1 && sceneName == "MainMenu") {
             if (this.alertui == null || this.alertui.IsDestroy()){
                 try {
@@ -58,16 +82,6 @@ public class CustomizationPickupFinderMod : MelonMod
                     // SKIP if null
                 }
             }
-        }
-
-        // Clear UI
-        if (buildIndex >= 3 && sceneName == "LoadingScreen"){
-            LoggerInstance.Msg($"Clearing UI when enter {sceneName}");
-            Thread t = new(() =>
-            {
-                this.alertui?.Clear();
-            });
-            t.Start();
         }
     }
 

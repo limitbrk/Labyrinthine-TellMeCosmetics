@@ -8,6 +8,7 @@ using UnityEngine.UI;
 namespace TellMeCosmetics.UI;
 public class ItemAlertUI
 {
+    private static readonly string TAG = "ItemAlert UI";
     private readonly CustomizationItem[] itemsCollection;
     private readonly TMP_FontAsset fontref;
 
@@ -22,6 +23,7 @@ public class ItemAlertUI
     // Value 
     private ushort itemID;
 
+
     public ItemAlertUI(RectTransform parentUI, ItemsCollectionSO itemsCollectionSO) 
     {
         this.fontref = parentUI.Find("Ping Text")?.GetComponent<TextMeshProUGUI>()?.font;
@@ -31,7 +33,7 @@ public class ItemAlertUI
         MelonLogger.Msg($"Loaded {this.itemsCollection.Length} cosmetic assets!");
 
         // Create a new panel
-        this.ui_object = new GameObject("ItemAlert UI");
+        this.ui_object = new GameObject(TAG);
         this.ui_object.SetActive(false);
         this.ui_object.transform.SetParent(parentUI, false);
 
