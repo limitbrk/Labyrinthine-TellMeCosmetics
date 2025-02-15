@@ -50,7 +50,7 @@ RevealAllItems = false
 ## Known Issues
 I'm not a Unity developer but I tried to search solution
 - MelonLoader launch game too long...
-- Sometimes game launched without Mod's UI
+- Mod's UI __Dissapeared__ when Recreated lobby
 - ~~(Fixed) Disc show wrong itemname~~
 ![bug01](docs/B01_Disc_no_icon.png)
 - ~~(Fixed) Sometimes Crash~~
