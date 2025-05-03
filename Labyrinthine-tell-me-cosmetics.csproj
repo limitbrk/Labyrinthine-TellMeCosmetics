@@ -1,35 +1,72 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
     <AssemblyName>TellMeCosmetics</AssemblyName>
-    <Product>Labyrinthine Mod: Tell Me Cosmetics</Product>
-    <Version>0.1.1</Version>
-    <!-- <AllowUnsafeBlocks>true</AllowUnsafeBlocks> -->
-    <LangVersion>latest</LangVersion>
+    <Product>Tell Me Cosmetics</Product>
+    <Version>0.1.2</Version>
     <RootNamespace>TellMeCosmetics</RootNamespace>
+
+    <!-- Config -->
+    <TargetFramework>net6.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <OutputPath>./build/</OutputPath>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>None</DebugType>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+
+    
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="LavaGang.MelonLoader" Version="0.6.5" />
+    <!-- Mod Loader -->
+    <PackageReference Include="LavaGang.MelonLoader" Version="0.7.0" />
+    <!-- Unity -->
     <PackageReference Include="OpenMod.UnityEngine" Version="3.8.10" />
     <PackageReference Include="Unity" Version="5.11.10" />
     <Reference Include="Il2Cppmscorlib">
       <HintPath>..\dlls\Il2Cppmscorlib.dll</HintPath>
+      <Private>false</Private>
     </Reference>
     <Reference Include="Il2CppInterop.Runtime">
       <HintPath>..\dlls\Il2CppInterop.Runtime.dll</HintPath>
+      <Private>false</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>..\libs\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
       <HintPath>..\dlls\Unity.TextMeshPro.dll</HintPath>
+      <Private>false</Private>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
       <HintPath>..\dlls\Unity.TextMeshPro.dll</HintPath>
+      <Private>false</Private>
     </Reference>
-    <!-- GAME SOURCE -->
+    <!-- GAME Based -->
     <Reference Include="Assembly-CSharp">
       <HintPath>..\dlls\Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
     </Reference>
+    <!-- ThunderStore Package -->
+    <PackageFiles Include="package\**\*.*" />
   </ItemGroup>
+  <Target Name="CopyFlatPackageFiles" AfterTargets="Build">
+    <Copy
+      SourceFiles="@(PackageFiles)"
+      DestinationFiles="@(PackageFiles->'$(OutputPath)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="true" />
+  </Target>
+  <Target Name="GenerateManifest" AfterTargets="Build">
+    <WriteLinesToFile
+      File="$(OutputPath)manifest.json"
+      Lines='{
+  "name": "$(AssemblyName)",
+  "version_number": "$(Version)",
+  "website_url": "https://github.com/limitbrk/Labyrinthine-TellMeCosmetics",
+  "description": "[client-side] Press `Tab` to check what cosmetic is currently in the area.",
+  "dependencies": [
+    "LavaGang-MelonLoader-0.7.0"
+  ]
+}'
+      Overwrite="true" />
+  </Target>
 </Project>

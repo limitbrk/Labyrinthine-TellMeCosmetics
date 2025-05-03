@@ -8,9 +8,9 @@ using Il2CppCharacterCustomization;
 
 using TellMeCosmetics;
 using TellMeCosmetics.UI;
-using Unity;
 
-[assembly: MelonInfo(typeof(CustomizationPickupFinderMod), "Tell Me Cosmetics", "0.1.1", "LimitBRK")]
+[assembly: VerifyLoaderVersion(0, 7, 0, true)]
+[assembly: MelonInfo(typeof(CustomizationPickupFinderMod), "TellMeCosmetics", "0.1.2", "LimitBRK")]
 [assembly: MelonGame("Valko Game Studios", "Labyrinthine")]
 
 namespace TellMeCosmetics;

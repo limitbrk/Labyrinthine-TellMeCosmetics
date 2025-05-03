@@ -10,7 +10,10 @@
 ![mod example](docs/Mod_Example4_Pickup_Item.png)
 
 
-## Get Started
+## Installation
+### With Mod Manager
+Avaliable in ThunderStore.io https://thunderstore.io/c/labyrinthine/p/LimitBRK/TellMeCosmetics/
+### No-Mod Manager 
 1. Download and install [MelonLoader](https://melonwiki.xyz) (Must v0.7.0+)
 2. Download the latest mod `.dll` [RELEASE](https://github.com/limitbrk/Labyrinthine-TellMeCosmetics/releases/latest) (Recommend latest)
 3. Copy `.dll` into the folder `Mods` in the game folder.
@@ -22,7 +25,7 @@ When game started onces. Please close game. Then file `Mods/TellMeCosmetics_conf
 [Gameplay]
 RevealAllItems = false
 ```
-- `RevealAllItems`: Show every item name include undiscovered (Default is `false`)
+- `RevealAllItems`: Show every item name, including undiscovered items. (Default is `false`)
 
 &nbsp;
 
@@ -39,17 +42,18 @@ RevealAllItems = false
 
 ## Features Plan
 - [x] **Display Case's Cosmetics item** - From ~~Cases board~~ Labyrinth Map
-- [x] **Show Item Name** - That really name not itemID
+- [x] **Show Item Name** - Display the actual item name instead of the item ID.
 - [x] **Show Image of Cosmetics Item** - only item name don't know how it's look
 - [X] **Masked Locked Items** - For Non-OP mods
-- [X] **Mark UI when picked up** - For who often forget you have picked it?
+- [X] **Mark UI when an item is picked up** -  to help users track their progress.
 - ~~**(Cancelled) Tweak UI** - more readable~~ _(I'm lack Unity UI skill to made this)_
 - ~~**(Cancelled) Animation** - Fade in / out?~~ 
-- ~~**(Cancelled) GetItem from Lobby** - Know Item by seeds without loading world~~ _(too hard for me)_
+- ~~**(Cancelled) GetItem from Lobby** - Know Item by seeds without loading world~~ _(Still looking for seeding machanics)_
 
 ## Known Issues
 I'm not a Unity developer but I tried to search solution
 - MelonLoader launch game too long...
+- Minor lag or freeze when a player joins the game.
 - ~~(Fixed) Mod's UI __Dissapeared__ when Recreated lobby~~
 - ~~(Fixed) Disc show wrong itemname~~
 ![bug01](docs/B01_Disc_no_icon.png)
@@ -59,7 +63,7 @@ I'm not a Unity developer but I tried to search solution
 
 &nbsp;
 &nbsp;
-# For Mod Developer
+# Contribution
 Here are details if you want to continue my job ;)
 
 ## Dev Requirement
