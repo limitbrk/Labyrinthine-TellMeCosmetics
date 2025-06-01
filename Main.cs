@@ -1,13 +1,12 @@
-﻿using MelonLoader;
+﻿using Il2CppCharacterCustomization;
+using MelonLoader;
 using System;
-using UnityEngine;
-
-using Il2CppCharacterCustomization;
-
-using TellMeCosmetics;
-using TellMeCosmetics.UI;
-using System.Linq;
 using System.Collections;
+using System.Linq;
+using TellMeCosmetics;
+using TellMeCosmetics.Config;
+using TellMeCosmetics.UI;
+using UnityEngine;
 
 [assembly: VerifyLoaderVersion(0, 6, 6, true)]
 [assembly: MelonInfo(typeof(CustomizationPickupFinderMod), ModInfo.Name, ModInfo.Version, ModInfo.Version)]
@@ -23,14 +22,11 @@ public class CustomizationPickupFinderMod : MelonMod
     private ItemAlertUI alertui;
 
     // Settings
-    private MelonPreferences_Category category_mod;
-    private MelonPreferences_Entry<bool> entry_revealall;
+    private GameplayConfig config;
 
     public override void OnInitializeMelon()
     {
-        category_mod = MelonPreferences.CreateCategory("Gameplay");
-        entry_revealall = category_mod.CreateEntry<bool>("RevealAllItems", false);
-
+        config = ConfigManager.Load();
         Instance = this; // Store a reference to the instance
         LoggerInstance.Msg($"TellMeCosmetics Mod Loaded!!!");
     }
@@ -38,20 +34,11 @@ public class CustomizationPickupFinderMod : MelonMod
     public override void OnSceneWasLoaded(int buildIndex, string sceneName)
     {
         LoggerInstance.Msg($"SCENE {buildIndex}/{sceneName} Loaded!");
-        if (this.itemsCollection == null)
-        {
-            ItemsCollectionSO[] ic = Resources.FindObjectsOfTypeAll<ItemsCollectionSO>();
-            if (ic.Length > 0)
-            {
-                this.itemsCollection = ic[0];
-                LoggerInstance.Msg("Init itemsCollectionSO Class");
-            }
-        }
+        MelonCoroutines.Start(InitItemsCollectionSO());
 
         // Clear UI
         if (buildIndex >= 3 && sceneName == "LoadingScreen")
         {
-            LoggerInstance.Msg($"Clearing UI when enter {sceneName}");
             MelonCoroutines.Start(ClearAlertUIAfterDelay());
         }
     }
@@ -68,8 +55,22 @@ public class CustomizationPickupFinderMod : MelonMod
             }
         }
     }
+    private IEnumerator InitItemsCollectionSO()
+    {
 
-private IEnumerator InitUI()
+        if (this.itemsCollection == null)
+        {
+            yield return null;
+
+            ItemsCollectionSO[] ic = Resources.FindObjectsOfTypeAll<ItemsCollectionSO>();
+            if (ic.Length > 0)
+            {
+                this.itemsCollection = ic[0];
+                LoggerInstance.Msg("Init itemsCollectionSO Class");
+            }
+        }
+    }
+    private IEnumerator InitUI()
     {
         yield return new WaitForSeconds(1.0f); // Give Unity time to fully load the UI
 
@@ -115,8 +116,8 @@ private IEnumerator InitUI()
     internal void Show(CustomizationPickup item)
     {
         // Intended to not hide itemname in log 
-        LoggerInstance.Msg($"Spawned Cosmetic ItemID {item.ItemID} {item.name}!");
-        if (!this.entry_revealall.Value && this.SaveInstance != null)
+        LoggerInstance.Msg($"📦Spawned Cosmetic ItemID {item.ItemID} {item.name}!");
+        if (!this.config.RevealAll.Value && this.SaveInstance != null)
         {
             this.alertui?.Show(item, reveal: this.SaveInstance.IsItemUnlocked(item.ItemID));
         }
@@ -135,5 +136,4 @@ private IEnumerator InitUI()
     {
         if (save != null) this.SaveInstance = save;
     }
-    
 }

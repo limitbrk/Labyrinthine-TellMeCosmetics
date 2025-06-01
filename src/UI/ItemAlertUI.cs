@@ -1,11 +1,12 @@
-using System;
 using Il2CppCharacterCustomization;
 using Il2CppTMPro;
 using MelonLoader;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace TellMeCosmetics.UI;
+
 public class ItemAlertUI
 {
     private static readonly string TAG = "ItemAlert UI";
@@ -24,11 +25,9 @@ public class ItemAlertUI
     private ushort itemID;
 
 
-    public ItemAlertUI(RectTransform parentUI, ItemsCollectionSO itemsCollectionSO) 
+    public ItemAlertUI(RectTransform parentUI, ItemsCollectionSO itemsCollectionSO)
     {
-        this.fontref = parentUI.Find("Ping Text")?.GetComponent<TextMeshProUGUI>()?.font;
-        
-        // TODO: more readable UI
+        this.fontref = UIUtils.GetFontByName("Larke Sans Regular SDF");
         this.itemsCollection = itemsCollectionSO?.collection;
         MelonLogger.Msg($"Loaded {this.itemsCollection.Length} cosmetic assets!");
 
@@ -72,7 +71,7 @@ public class ItemAlertUI
         this.iconAltImage.alignment = TextAlignmentOptions.Midline;
         RectTransform imageAltRect = this.iconAltObject.GetComponent<RectTransform>();
         imageAltRect.sizeDelta = new Vector2(64, 64);
-        
+
         // Add Text component for displaying item name
         GameObject textObject = new("Item Name");
         textObject.transform.SetParent(this.ui_object.transform, false);
@@ -84,38 +83,44 @@ public class ItemAlertUI
         this.myText.overflowMode = TextOverflowModes.Overflow;
     }
 
-    private void SetItemUI(string itemText, Sprite icon = null, char altIcon = '?'){
+    private void SetItemUI(string itemText, Sprite icon = null, char altIcon = '?')
+    {
         this.myText.text = itemText;
         this.myText.fontStyle = FontStyles.Normal;
 
-        this.iconImage.sprite = icon; 
+        this.iconImage.sprite = icon;
         this.iconObject.SetActive(icon != null);
 
-        this.iconAltImage.text = (icon == null) ? altIcon.ToString() : string.Empty; 
+        this.iconAltImage.text = (icon == null) ? altIcon.ToString() : string.Empty;
         this.iconAltObject.SetActive(icon == null);
 
         this.ui_object.SetActive(true);
     }
-    
-    public void Show(CustomizationPickup item, bool reveal = true) 
+
+    public void Show(CustomizationPickup item, bool reveal = true)
     {
         this.itemID = item.ItemID;
         // Check if components are initialized
         if (this.ui_object == null || this.myText == null || this.iconImage == null) return;
 
-        if (!reveal) {
+        if (!reveal)
+        {
             this.SetItemUI("Undiscovered Item");
-        } else if (this.itemsCollection != null && itemsCollection.Length >= 0){
-            if (this.itemID >= itemsCollection.Length){
+        }
+        else if (this.itemsCollection != null && itemsCollection.Length >= 0)
+        {
+            if (this.itemID >= itemsCollection.Length)
+            {
                 throw new Exception("Out of itemID index to search");
             }
             // DEV Still use array index as itemId
             CustomizationItem itemData = this.itemsCollection[this.itemID];
             string basedItemDataname = ""
                 + $"#{this.itemID} "
-                + $"{(!string.IsNullOrEmpty(itemData.Name) ? itemData.Name : itemData.icon.name).Replace("_"," ")} "
+                + $"{(!string.IsNullOrEmpty(itemData.Name) ? itemData.Name : itemData.icon.name).Replace("_", " ")} "
                 + $"({itemData.ItemRarity})";
-            switch (itemData.BodyPart){
+            switch (itemData.BodyPart)
+            {
                 case BodyPart.Music:
                     this.SetItemUI(basedItemDataname, altIcon: '♫');
                     break;
@@ -123,34 +128,38 @@ public class ItemAlertUI
                     this.SetItemUI(basedItemDataname, itemData.Icon);
                     break;
             }
-        } else {
+        }
+        else
+        {
             this.SetItemUI($"#{this.itemID} {FilterClone(item.name)}");
         }
     }
 
-    public void Pickup(ushort itemID){
-        if (this.itemID == itemID) {
+    public void Pickup(ushort itemID)
+    {
+        if (this.itemID == itemID)
+        {
             MelonLogger.Msg("Picked item up");
             this.myText.fontStyle = FontStyles.Strikethrough;
         }
     }
 
-    public void Clear() 
+    public void Clear()
     {
-        if(this.ui_object == null || this.myText == null) return; 
+        if (this.ui_object == null || this.myText == null) return;
         this.ui_object.SetActive(false);
-        
+
         this.myText.text = string.Empty;
         this.myText.fontStyle = FontStyles.Normal;
 
         this.iconImage.sprite = null;  // Clear the icon
         this.iconObject.SetActive(false);
 
-        this.iconAltImage.text = string.Empty; 
+        this.iconAltImage.text = string.Empty;
         this.iconAltObject.SetActive(false);
     }
 
-    public bool IsDestroy() 
+    public bool IsDestroy()
     {
         return this.ui_object == null;
     }
@@ -160,7 +169,7 @@ public class ItemAlertUI
         const string cloneSuffix = "(Clone)";
         if (name.EndsWith(cloneSuffix))
         {
-            return name[..^cloneSuffix.Length].Replace("_"," ");
+            return name[..^cloneSuffix.Length].Replace("_", " ");
         }
         return name;
     }

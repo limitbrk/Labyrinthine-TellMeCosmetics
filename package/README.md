@@ -17,7 +17,6 @@ RevealAllItems = false
 ```
 - `RevealAllItems`: Show every item name, including undiscovered items. (Default = `false`)
 
-
 ## Mod Status
 **ONLY Tested on Windows 11 AMDx64** 
 
@@ -30,10 +29,6 @@ RevealAllItems = false
 - ~~**(Cancelled) Tweak UI** - more readable~~ _(I'm lack Unity UI skill to made this)_
 - ~~**(Cancelled) Animation** - Fade in / out?~~ 
 - ~~**(Cancelled) GetItem from Lobby** - Know Item by seeds without loading world~~ _(Still looking for seeding machanics)_
-
-## Known Issues
-I'm not a Unity developer but I tried to search solution
-- Minor lag or freeze when a player joins the game.
 
 # ChangeLog 
 For the full changelog, check the [Github Release Notes.](https://github.com/limitbrk/Labyrinthine-TellMeCosmetics/releases)

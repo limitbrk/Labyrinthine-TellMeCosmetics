@@ -1,29 +1,18 @@
 using HarmonyLib;
-
 using Il2CppCharacterCustomization;
-using Il2CppValkoGames.Labyrinthine.Cases;
-using UnityEngine;
 
 namespace TellMeCosmetics;
 
-[HarmonyPatch(typeof(RndSpawnerBase), nameof(RndSpawnerBase.SpawnItem))]
-class CustomizationItemSpawnListener
+[HarmonyPatch(typeof(CustomizationPickup), nameof(CustomizationPickup.Start))]
+class Customization_SpawnItemListener
 {
-    static void Postfix(ref GameObject spawned, bool __result){
-        if (__result && spawned != null)
-        {
-            var customizationPickup = spawned.GetComponentInChildren<CustomizationPickup>();
-            if (customizationPickup == null)
-            {
-                // Non-Cosmetics = skip ... [You may get idea for all item tracking]
-                return;
-            }
-            CustomizationPickupFinderMod.Instance?.Show(customizationPickup);
-        }
+    static void Postfix(CustomizationPickup __instance)
+    {
+        CustomizationPickupFinderMod.Instance?.Show(__instance);
     }
 }
 [HarmonyPatch(typeof(CustomizationPickup), nameof(CustomizationPickup.Pickup))]
-class CustomizationPickupPickupListener
+class Customization_PickUpListener
 {
     static void Postfix(CustomizationPickup __instance){
         CustomizationPickupFinderMod.Instance?.Pickup(__instance.ItemID);
@@ -31,7 +20,7 @@ class CustomizationPickupPickupListener
 }
 
 [HarmonyPatch(typeof(CustomizationSave), nameof(CustomizationSave.Load))]
-class CustomizationSaveLoadListener
+class Customization_SaveLoadListener
 {
     static void Postfix(CustomizationSave __result)
     {

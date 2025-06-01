@@ -2,10 +2,10 @@
   <PropertyGroup>
     <AssemblyName>TellMeCosmetics</AssemblyName>
     <Product>Tell Me Cosmetics</Product>
-    <Version>0.1.3</Version>
+    <Version>0.1.4</Version>
     <RootNamespace>TellMeCosmetics</RootNamespace>
     <Author>LimitBRK</Author>
-
+    
     <!-- Config -->
     <TargetFramework>net6.0</TargetFramework>
     <LangVersion>latest</LangVersion>
@@ -17,7 +17,7 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- Mod Loader -->
-    <PackageReference Include="LavaGang.MelonLoader" Version="0.6.6" />
+    <PackageReference Include="LavaGang.MelonLoader" Version="0.7.0" />
     <!-- Unity -->
     <PackageReference Include="OpenMod.UnityEngine" Version="3.8.10" />
     <PackageReference Include="Unity" Version="5.11.10" />
@@ -46,7 +46,7 @@
       <HintPath>..\dlls\Assembly-CSharp.dll</HintPath>
       <Private>false</Private>
     </Reference>
-
+    
     <!-- ThunderStore Package -->
     <PackageFiles Include="package\**\*.*" />
   </ItemGroup>
@@ -59,24 +59,45 @@
   <Target Name="GenerateManifest" AfterTargets="Build">
     <WriteLinesToFile
       File="$(OutputPath)manifest.json"
-      Lines='{
-  "name": "$(AssemblyName)",
-  "version_number": "$(Version)",
-  "website_url": "https://github.com/limitbrk/Labyrinthine-TellMeCosmetics",
-  "description": "[client-side] Press `Tab` to check what cosmetic is currently in the area.",
-  "dependencies": [
-    "LavaGang-MelonLoader-0.6.6"
-  ]
-}'
+      Lines='{;
+            "name": "$(AssemblyName)",;
+            "version_number": "$(Version)",;
+            "website_url": "https://github.com/limitbrk/Labyrinthine-TellMeCosmetics",;
+            "description": "Press `Tab` to check what cosmetic is currently in the area.",;
+            "dependencies": [;
+            "LavaGang-MelonLoader-0.7.0";
+            ];
+            }'
       Overwrite="true" />
+  </Target>
+  
+  <!-- Package as zip -->
+  <Target Name="ZipOutputAfterBuild" AfterTargets="Build">
+    <PropertyGroup>
+      <OutputDir>$(OutputPath)</OutputDir>
+      <ZipFileName>$(AssemblyName)-v$(Version).zip</ZipFileName>
+      <ZipFullPath>$(OutputDir)\$(ZipFileName)</ZipFullPath>
+    </PropertyGroup>
+    
+    <ItemGroup>
+      <FilesToDelete Include="$(OutputDir)\*.zip" />
+    </ItemGroup>
+    <Delete Files="@(FilesToDelete)" />
+    
+    <!-- Cross-platform zip using Exec and shell detection -->
+    <Exec Condition=" '$(OS)' == 'Windows_NT' "
+          Command="powershell -Command &quot;Compress-Archive -Path '$(OutputDir)\*' -DestinationPath '$(ZipFullPath)' -Force&quot;" />
+    
+    <Exec Condition=" '$(OS)' != 'Windows_NT' "
+          Command="bash -c &quot;cd '$(OutputDir)' &amp;&amp; zip -r '$(ZipFileName)' .&quot;" />
   </Target>
   
   <!-- Generated ModInfo.cs -->
   <ItemGroup>
-    <Compile Remove="Generated\**\*.cs" />
+    <Compile Remove="generated\**\*.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Generated\ModInfo.cs" />
+    <Compile Include="generated\ModInfo.cs" />
   </ItemGroup>
   <Target Name="WriteModInfoFile" BeforeTargets="BeforeBuild">
     <ItemGroup>
@@ -86,11 +107,12 @@
       <ModInfoLines Include="public const string Author = &quot;$(Author)&quot;%3B"/>
       <ModInfoLines Include="}"/>
     </ItemGroup>
-
+    
     <WriteLinesToFile 
       File="Generated\ModInfo.cs" 
       Lines="@(ModInfoLines)" 
       Overwrite="true" 
       Encoding="UTF-8" />
   </Target>
+  
 </Project>
