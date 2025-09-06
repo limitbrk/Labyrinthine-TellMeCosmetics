@@ -57,53 +57,71 @@ public class CustomizationPickupFinderMod : MelonMod
     }
     private IEnumerator InitItemsCollectionSO()
     {
+        if (this.itemsCollection != null) yield break;
 
-        if (this.itemsCollection == null)
+        for (int attempts = 0; attempts < 3; attempts++)
         {
-            yield return null;
-
             ItemsCollectionSO[] ic = Resources.FindObjectsOfTypeAll<ItemsCollectionSO>();
             if (ic.Length > 0)
             {
                 this.itemsCollection = ic[0];
                 LoggerInstance.Msg("Init itemsCollectionSO Class");
+                yield break;
             }
+            yield return new WaitForSeconds(0.1f);
         }
+        LoggerInstance.Warning("Failed to initialize ItemsCollectionSO after 3 attempts");
     }
     private IEnumerator InitUI()
     {
-        yield return new WaitForSeconds(1.0f); // Give Unity time to fully load the UI
+        yield return new WaitForSeconds(0.2f); // Reduced wait time
+        
+        for (int attempts = 0; attempts < 3; attempts++)
+        {
+            if (TryInitializeUI())
+            {
+                LoggerInstance.Msg("UI initialized successfully.");
+                yield break;
+            }
+            yield return new WaitForSeconds(0.1f);
+            LoggerInstance.Warning($"UI initialization attempt {attempts + 1}/3 failed, retrying...");
+        }
+        LoggerInstance.Error("Failed to initialize UI after 3 attempts");
+    }
 
+    private bool TryInitializeUI()
+    {
         try
         {
             var tabMenu = GameObject.Find("Global/Global Canvas/Player_UI/Tab Menu");
             if (tabMenu == null)
             {
                 LoggerInstance.Warning("UI Tab Menu not found!");
-                yield break;
+                return false;
             }
 
             RectTransform ui = tabMenu.GetComponent<RectTransform>();
             if (ui == null)
             {
                 LoggerInstance.Warning("UI RectTransform missing!");
-                yield break;
+                return false;
             }
 
             itemsCollection = Resources.FindObjectsOfTypeAll<ItemsCollectionSO>().FirstOrDefault();
             if (itemsCollection == null)
             {
                 LoggerInstance.Warning("ItemsCollectionSO not found!");
-                yield break;
+                return false;
             }
 
             LoggerInstance.Msg("Initializing UI components...");
             this.alertui = new ItemAlertUI(ui, itemsCollection);
-            LoggerInstance.Msg("UI initialized successfully.");
+            return true;
         }
         catch (Exception ex)
         {
             LoggerInstance.Error($"[InitUI] Exception: {ex}");
+            return false;
         }
     }
     private IEnumerator ClearAlertUIAfterDelay()
@@ -113,18 +131,48 @@ public class CustomizationPickupFinderMod : MelonMod
         LoggerInstance.Msg("UI Cleared");
     }
 
+    private System.Collections.Generic.Queue<CustomizationPickup> pendingItems = new();
+    private bool isProcessingItems = false;
+
     internal void Show(CustomizationPickup item)
     {
-        // Intended to not hide itemname in log 
-        LoggerInstance.Msg($"📦Spawned Cosmetic ItemID {item.ItemID} {item.name}!");
-        if (!this.config.RevealAll.Value && this.SaveInstance != null)
+        if (item.gameObject.transform.localPosition == Vector3.zero) return; // Invalid position, likely not spawned in world
+        
+        // Queue the item instead of showing immediately
+        pendingItems.Enqueue(item);
+        
+        // Start processing if not already running
+        if (!isProcessingItems)
         {
-            this.alertui?.Show(item, reveal: this.SaveInstance.IsItemUnlocked(item.ItemID));
+            MelonCoroutines.Start(ProcessPendingItems());
         }
-        else
+    }
+
+    private IEnumerator ProcessPendingItems()
+    {
+        isProcessingItems = true;
+        
+        while (pendingItems.Count > 0)
         {
-            this.alertui?.Show(item);
+            var item = pendingItems.Dequeue();
+
+            // Process item
+            if (item.gameObject.transform.localPosition == Vector3.zero) continue; // Invalid position, likely not spawned in world
+            LoggerInstance.Msg($"📦Spawned Cosmetic ItemID {item.ItemID} {item.name}!");
+            if (!this.config.RevealAll.Value && this.SaveInstance != null)
+            {
+                this.alertui?.Show(item, reveal: this.SaveInstance.IsItemUnlocked(item.ItemID));
+            }
+            else
+            {
+                this.alertui?.Show(item);
+            }
+            
+            // Add a small delay between processing items
+            yield return new WaitForSeconds(0.05f);
         }
+        
+        isProcessingItems = false;
     }
 
     internal void Pickup(ushort itemID)

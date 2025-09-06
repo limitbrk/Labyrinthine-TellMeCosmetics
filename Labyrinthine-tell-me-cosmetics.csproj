@@ -2,7 +2,7 @@
   <PropertyGroup>
     <AssemblyName>TellMeCosmetics</AssemblyName>
     <Product>Tell Me Cosmetics</Product>
-    <Version>0.1.4</Version>
+    <Version>0.1.5</Version>
     <RootNamespace>TellMeCosmetics</RootNamespace>
     <Author>LimitBRK</Author>
     
