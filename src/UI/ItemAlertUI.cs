@@ -115,10 +115,7 @@ public class ItemAlertUI
             }
             // DEV Still use array index as itemId
             CustomizationItem itemData = this.itemsCollection[this.itemID];
-            string basedItemDataname = ""
-                + $"#{this.itemID} "
-                + $"{(!string.IsNullOrEmpty(itemData.Name) ? itemData.Name : itemData.icon.name).Replace("_", " ")} "
-                + $"({itemData.ItemRarity})";
+            string basedItemDataname = Describe(itemData, this.itemID);
             switch (itemData.BodyPart)
             {
                 case BodyPart.Music:
@@ -134,6 +131,11 @@ public class ItemAlertUI
             this.SetItemUI($"#{this.itemID} {FilterClone(item.name)}");
         }
     }
+
+    internal static string Describe(CustomizationItem itemData, ushort itemID) => ""
+        + $"#{itemID} "
+        + $"{(!string.IsNullOrEmpty(itemData.Name) ? itemData.Name : itemData.icon.name).Replace("_", " ")} "
+        + $"({itemData.ItemRarity})";
 
     public void Pickup(ushort itemID)
     {

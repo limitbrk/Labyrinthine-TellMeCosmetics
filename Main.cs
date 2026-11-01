@@ -1,10 +1,12 @@
 ﻿using Il2CppCharacterCustomization;
+using Il2CppRandomGeneration.Contracts;
 using MelonLoader;
 using System;
 using System.Collections;
 using System.Linq;
 using TellMeCosmetics;
 using TellMeCosmetics.Config;
+using TellMeCosmetics.Predict;
 using TellMeCosmetics.UI;
 using UnityEngine;
 
@@ -26,7 +28,7 @@ public class CustomizationPickupFinderMod : MelonMod
 
     public override void OnInitializeMelon()
     {
-        config = ConfigManager.Load();
+        config = ConfigManager.Instance;
         Instance = this; // Store a reference to the instance
         LoggerInstance.Msg($"TellMeCosmetics Mod Loaded!!!");
     }
@@ -178,6 +180,37 @@ public class CustomizationPickupFinderMod : MelonMod
     internal void Pickup(ushort itemID)
     {
         this.alertui?.Pickup(itemID);
+    }
+
+    internal void CapturePool(RndCustomizationItemsManager mgr)
+    {
+        ContractPredictor.Capture(mgr);
+        var contract = Il2Cpp.GameValues.instance?.RandomMazeContract;
+        var maze = Il2Cpp.MazeGenerator.instance;
+        // The end-to-end check simulates the whole maze again, so it only runs with DebugMazeTests.
+        if (contract == null || maze == null || !this.config.DebugMazeTests.Value) return;
+        // Failed maze attempts shift the seeds; the maze simulation should land on the same ones.
+        var (seed, second, simulated) = ContractPredictor.MazeSeeds(contract);
+        bool seedsOk = seed == maze.seed && second == maze.secondSeed;
+        LoggerInstance.Msg($"🔮Lobby prediction for this contract: {ContractPredictor.Predict(contract, out _, out _)?.ToString() ?? "none"}"
+            + $" | 🎯Pipeline {(!simulated ? "NOT SIMULATED" : seedsOk ? "MATCH" : "MISMATCH")} predicted {seed}/{second} actual {maze.seed}/{maze.secondSeed} (contract {contract.Seed}/{contract.SecondSeed})");
+    }
+
+    internal void ShowPrediction(ContractUI ui)
+    {
+        var contract = ui.Contract;
+        if (contract == null || ui.infoText == null) return;
+
+        string line;
+        bool simulated = false;
+        if (!ContractPredictor.HasPool) line = "Cosmetic: ? (play one map to learn the pool)";
+        else if (ContractPredictor.Predict(contract, out _, out simulated) is not int id) line = "Cosmetic: none";
+        else if (!this.config.RevealAll.Value && this.SaveInstance != null && !this.SaveInstance.IsItemUnlocked((ushort)id)) line = "Cosmetic: Undiscovered Item";
+        else if (this.itemsCollection != null && id < this.itemsCollection.collection.Length) line = "Cosmetic: " + ItemAlertUI.Describe(this.itemsCollection.collection[id], (ushort)id);
+        else line = $"Cosmetic: #{id}";
+
+        // "?" = this maze type was never captured, so the prediction assumes the maze builds on its first attempt.
+        ui.infoText.text += line + (ContractPredictor.HasPool && !simulated ? " ?" : ""); // UpdateUI rebuilds the text each call and already ends with a newline
     }
 
     internal void UpdateSave(CustomizationSave save)

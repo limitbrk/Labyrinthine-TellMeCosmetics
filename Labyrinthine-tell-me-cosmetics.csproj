@@ -2,7 +2,7 @@
   <PropertyGroup>
     <AssemblyName>TellMeCosmetics</AssemblyName>
     <Product>Tell Me Cosmetics</Product>
-    <Version>0.1.5</Version>
+    <Version>1.0.0</Version>
     <RootNamespace>TellMeCosmetics</RootNamespace>
     <Author>LimitBRK</Author>
     
@@ -23,6 +23,14 @@
     <PackageReference Include="Unity" Version="5.11.10" />
     <Reference Include="Il2Cppmscorlib">
       <HintPath>..\dlls\Il2Cppmscorlib.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Il2CppSystem.Core">
+      <HintPath>..\dlls\Il2CppSystem.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Il2CppBehaviorDesigner.Runtime">
+      <HintPath>..\dlls\Il2CppBehaviorDesigner.Runtime.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="Il2CppInterop.Runtime">
