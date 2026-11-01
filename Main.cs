@@ -1,5 +1,6 @@
 ﻿using Il2CppCharacterCustomization;
 using Il2CppRandomGeneration.Contracts;
+using Il2CppValkoGames.Labyrinthine.UI.Customization;
 using MelonLoader;
 using System;
 using System.Collections;
@@ -22,6 +23,7 @@ public class CustomizationPickupFinderMod : MelonMod
     private CustomizationSave SaveInstance;
     private ItemsCollectionSO itemsCollection;
     private ItemAlertUI alertui;
+    private CustomizationUISlot menuSlot; // any slot (prefab included) carries the menu's rarity splash sprites/colours
 
     // Settings
     private GameplayConfig config;
@@ -201,16 +203,36 @@ public class CustomizationPickupFinderMod : MelonMod
         var contract = ui.Contract;
         if (contract == null || ui.infoText == null) return;
 
-        string line;
+        var view = new ContractItemUI.View();
         bool simulated = false;
-        if (!ContractPredictor.HasPool) line = "Cosmetic: ? (play one map to learn the pool)";
-        else if (ContractPredictor.Predict(contract, out _, out simulated) is not int id) line = "Cosmetic: none";
-        else if (!this.config.RevealAll.Value && this.SaveInstance != null && !this.SaveInstance.IsItemUnlocked((ushort)id)) line = "Cosmetic: Undiscovered Item";
-        else if (this.itemsCollection != null && id < this.itemsCollection.collection.Length) line = "Cosmetic: " + ItemAlertUI.Describe(this.itemsCollection.collection[id], (ushort)id);
-        else line = $"Cosmetic: #{id}";
-
-        // "?" = this maze type was never captured, so the prediction assumes the maze builds on its first attempt.
-        ui.infoText.text += line + (ContractPredictor.HasPool && !simulated ? " ?" : ""); // UpdateUI rebuilds the text each call and already ends with a newline
+        int? predicted = ContractPredictor.HasPool ? ContractPredictor.Predict(contract, out _, out simulated) : null;
+        // "?" until the pool and this maze type are learned: unsimulated seeds assume a first-attempt build and are often wrong.
+        if (!ContractPredictor.HasPool || !simulated) view.AltIcon = "?";
+        else if (predicted is not int id) { } // no cosmetic: show nothing
+        else
+        {
+            var item = this.itemsCollection != null && id < this.itemsCollection.collection.Length ? this.itemsCollection.collection[id] : null;
+            bool isNew = this.SaveInstance != null && !this.SaveInstance.IsItemUnlocked((ushort)id);
+            bool locked = isNew && !this.config.RevealAll.Value;
+            bool music = item != null && item.BodyPart == BodyPart.Music;
+            view.Icon = music ? null : item?.Icon;
+            view.AltIcon = music ? "♫" : "?";
+            view.Silhouette = locked;
+            view.New = isNew;
+            // Locked items get no splash, so the colour cannot reveal their rarity.
+            // Same splash as the customization menu (CustomizationUISlot.SetItem): backgroundSprites[rarity] tinted backgroundColors[rarity].
+            if (this.menuSlot == null) this.menuSlot = Resources.FindObjectsOfTypeAll<CustomizationUISlot>().FirstOrDefault();
+            var slot = this.menuSlot;
+            int rarity = item == null || locked ? -1 : (int)item.ItemRarity;
+            if (slot != null && rarity >= 0 && rarity < slot.backgroundColors.Length && rarity < slot.backgroundSprites.Length)
+            {
+                // Only special rarities have their own sprite; the rest use the slot image's own splash
+                // (defaultBackgroundSprite is copied from it in Init, so it is still null on the prefab).
+                view.Frame = slot.backgroundSprites[rarity] ?? slot.itemBackgroundImage?.sprite;
+                view.FrameColor = slot.backgroundColors[rarity];
+            }
+        }
+        ContractItemUI.Show(ui, view);
     }
 
     internal void UpdateSave(CustomizationSave save)

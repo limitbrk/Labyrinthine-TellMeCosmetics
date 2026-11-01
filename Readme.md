@@ -9,8 +9,10 @@
 ### Case: When picked up
 ![mod example](docs/Mod_Example4_Pickup_Item.png)
 ### Case: Contract board in the lobby
-Every contract shows `Cosmetic: <item>` (or `Cosmetic: none` when no cosmetic will spawn) before you start it.
-- Enter **one map of each maze type once** so the mod can learn that maze's generation settings. Until then the line ends with ` ?`, meaning the prediction assumes the maze builds on its first attempt.
+Every contract shows the cosmetic it will spawn as an icon under the contract photo, before you start it.
+- The card shows the item picture like a polaroid; items you have not unlocked yet get a red `NEW` badge and show as a white silhouette (unless `RevealAllItems=true`).
+- A `?` card means the contract's maze type is not learned yet: enter **one map of each maze type once** so the mod learns the cosmetic pool and that maze's generation settings.
+- No icon means no cosmetic will spawn for that contract.
 - After that, the prediction is exact: the mod replays the game's maze generation (including failed build attempts) to find the seeds the cosmetic roll will use.
 
 
