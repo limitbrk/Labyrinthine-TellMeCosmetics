@@ -110,6 +110,8 @@ Add to the game's Steam launch options:
 - MelonLoader caused a Steam UI bug (fixed in ML v0.6.6)
 </details>
 
+<sub>🤖 **AI disclosure:** lobby prediction, game-file reading and performance fixes were written with help from an AI coding assistant (Claude). The author designed, reviewed and tested them in-game. All images are real in-game screenshots.</sub>
+
 &nbsp;
 
 # Contribution
