@@ -12,7 +12,7 @@ public static class ContractItemUI
     private const string Name = "TMC Contract Cosmetic";
     // Polaroid layout: paper border (thicker at the bottom), black square with the item, NEW badge on the top-right corner.
     private const float Width = 100f, IconHeight = 100f, LabelHeight = 14f, Border = 6f; // canvas units
-    private static readonly Vector2 BadgePos = new(31f, (IconHeight + LabelHeight) / 2f - 5f), BadgeSize = new(46f, 18f); // canvas units, from centre
+    private static readonly Vector2 BadgePos = new(26f, (IconHeight + LabelHeight) / 2f - 7f), BadgeSize = new(56f, 24f); // canvas units, from centre
 
     public sealed class View
     {
@@ -29,11 +29,14 @@ public static class ContractItemUI
         var root = ui.transform.Find(Name)?.gameObject ?? Create(ui);
         bool any = view.Icon != null || !string.IsNullOrEmpty(view.AltIcon);
         root.SetActive(any);
+        var alt = root.transform.Find("Alt").GetComponent<TextMeshProUGUI>();
         if (!any)
         {
+            alt.text = "";
             // No card: put any seal we moved back where the game placed it.
             foreach (var stamp in ui.stamps ?? new Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppReferenceArray<GameObject>(0))
                 if (stamp != null) stamp.transform.position = SealHome(stamp.transform).position;
+            UpdateNote(ui);
             return;
         }
         Place(ui, root.transform);
@@ -41,10 +44,70 @@ public static class ContractItemUI
         var mat = root.transform.Find("Paper").GetComponent<MeshRenderer>().sharedMaterial;
         mat.mainTexture = Compose(mat.mainTexture?.TryCast<RenderTexture>(), view);
 
-        var alt = root.transform.Find("Alt").GetComponent<TextMeshProUGUI>();
         alt.text = view.Icon == null ? view.AltIcon ?? "" : "";
 
         root.transform.Find("Badge").gameObject.SetActive(view.New);
+        UpdateNote(ui);
+    }
+
+    private const string NoteName = "TMC Note";
+
+    // Hint on the board's bottom-right frame, below the custom contract, shown while any card shows "?".
+    private static void UpdateNote(ContractUI ui)
+    {
+        // The custom contract hangs under a different parent than the regular ones, so look at every contract in the scene.
+        // includeInactive: on lobby load the board's contracts get UpdateUI before they are active, so an active-only search missed them.
+        var contracts = Object.FindObjectsOfType<ContractUI>(true);
+        bool unknown = false;
+        ContractUI anchor = ui;
+        foreach (var c in contracts)
+        {
+            if (c.IsCustom) anchor = c;
+            var card = c.transform.Find(Name);
+            unknown |= card != null && card.gameObject.activeSelf && card.Find("Alt").GetComponent<TextMeshProUGUI>().text == "?";
+        }
+        if (note == null)
+        {
+            if (!unknown) return;
+            note = CreateNote(anchor);
+        }
+        note.gameObject.SetActive(unknown);
+    }
+
+    private static Transform note; // scene object; Unity's null check turns true once the lobby unloads
+
+    // shortcut: offsets eyeballed from one screenshot (in widths of the custom contract's sheet); retune if the board changes.
+    private static Transform CreateNote(ContractUI anchor)
+    {
+        var text = anchor.infoText.transform;
+        // The contract hangs askew; the frame does not, so the note stays level with the world's up.
+        Vector3 forward = text.forward, up = Vector3.ProjectOnPlane(Vector3.up, forward).normalized, right = Vector3.Cross(up, forward);
+        var sheet = anchor.GetComponent<Renderer>();
+        var b = sheet != null ? sheet.bounds : new Bounds(text.position, Vector3.one);
+        float sheetWidth = Extent(b.size, right);
+        var sheetBottom = b.center - up * (Extent(b.size, up) / 2f);
+
+        var go = new GameObject(NoteName);
+        go.transform.SetParent(anchor.transform.parent, false);
+        go.AddComponent<Canvas>().renderMode = RenderMode.WorldSpace;
+        var rt = go.GetComponent<RectTransform>();
+        rt.sizeDelta = new Vector2(400f, 70f);
+        go.transform.rotation = Quaternion.LookRotation(forward, up);
+        // Down onto the bottom frame, right of the hinge, and out toward the viewer since the frame stands in front of the cork.
+        go.transform.position = sheetBottom + right * (sheetWidth * 0.15f) - up * (sheetWidth * 1.32f) - forward * (sheetWidth * 0.15f);
+        float scale = sheetWidth * 1.5f / rt.sizeDelta.x;
+        var parent = go.transform.parent.lossyScale;
+        go.transform.localScale = new Vector3(scale / parent.x, scale / parent.y, scale / parent.z);
+
+        var t = go.AddComponent<TextMeshProUGUI>();
+        t.font = anchor.infoText.font;
+        t.fontSize = 22;
+        t.color = Color.white;
+        t.alignment = TextAlignmentOptions.Left;
+        t.enableWordWrapping = true;
+        t.raycastTarget = false;
+        t.text = "<b>TellMeCosmetics Note:</b>\nIf an item shows \"?\", enter that map type once";
+        return go.transform;
     }
 
     private static GameObject Create(ContractUI ui)
@@ -61,10 +124,9 @@ public static class ContractItemUI
         var alt = Text(ui, Child(root, "Alt", new Vector2(0, LabelHeight / 2), new Vector2(Width, IconHeight)), 80);
         alt.fontStyle = FontStyles.Bold;
         alt.color = new Color(0.85f, 0.85f, 0.8f); // sits on the black square
-        alt.color = new Color(0.85f, 0.85f, 0.8f); // sits on the black square
 
         // Badge text only; its red tag is painted into the lit paper texture by Compose.
-        var badge = Text(ui, Child(root, "Badge", BadgePos, BadgeSize), 14);
+        var badge = Text(ui, Child(root, "Badge", BadgePos, BadgeSize), 21);
         badge.text = "NEW";
         badge.fontStyle = FontStyles.Bold;
         badge.color = Color.white;
@@ -157,7 +219,7 @@ public static class ContractItemUI
     private static Material silhouette;
 
     // Locked items: the icon's alpha filled with plain white. DrawTexture's tint only multiplies, so it cannot whiten dark pixels.
-    private static Material SilhouetteMaterial()
+    internal static Material SilhouetteMaterial()
     {
         if (silhouette != null) return silhouette;
         silhouette = new Material(Shader.Find("GUI/Text Shader")) { color = Color.white };

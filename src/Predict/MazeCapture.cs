@@ -63,6 +63,7 @@ class MazeCapture
             ContractPredictor.ClearOutcomes();
 
             if (!TellMeCosmetics.Config.ConfigManager.Instance.DebugMazeTests.Value) return;
+            ScenePreload.Check(cfg.MazeType, cfg, null);
             int predictedSet = MazePipeline.SelectObjectiveSet(cfg, ContractPredictor.ToInput(contract));
             int actualSet = mgr.objectiveSets == null ? -1 : Array.FindIndex(mgr.objectiveSets.ToArray(), s => s != null && mgr.activeObjectiveSet != null && s.Pointer == mgr.activeObjectiveSet.Pointer);
             MelonLogger.Msg($"🧪ObjectiveSet {(predictedSet == actualSet ? "MATCH" : "MISMATCH")} predicted={predictedSet} actual={actualSet} | captured tile={cfg.Tile} maxWaypointsDistance={cfg.MaxWaypointsDistance:R} waypointGenerators={cfg.Waypoints?.Length ?? 0}");

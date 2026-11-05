@@ -17,10 +17,12 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- Mod Loader -->
-    <PackageReference Include="LavaGang.MelonLoader" Version="0.7.0" />
+    <PackageReference Include="LavaGang.MelonLoader" Version="0.7.3" />
     <!-- Unity -->
     <PackageReference Include="OpenMod.UnityEngine" Version="3.8.10" />
     <PackageReference Include="Unity" Version="5.11.10" />
+    <!-- Transitive 8.0 package; the net6 runtime only has System.Text.Json 6.0, so compile against the framework copy -->
+    <PackageReference Include="System.Text.Json" Version="8.0.5" ExcludeAssets="all" />
     <Reference Include="Il2Cppmscorlib">
       <HintPath>..\dlls\Il2Cppmscorlib.dll</HintPath>
       <Private>false</Private>
@@ -31,6 +33,11 @@
     </Reference>
     <Reference Include="Il2CppBehaviorDesigner.Runtime">
       <HintPath>..\dlls\Il2CppBehaviorDesigner.Runtime.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <!-- Shipped with MelonLoader (MelonLoader/net6) -->
+    <Reference Include="AssetsTools.NET">
+      <HintPath>..\dlls\AssetsTools.NET.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="Il2CppInterop.Runtime">
@@ -55,6 +62,8 @@
       <Private>false</Private>
     </Reference>
     
+    <!-- Baseline caches from the developer's game build (copy of UserData/TellMeCosmetics.maze.bin and UserData/TellMeCosmetics/pool.*.txt) -->
+    <EmbeddedResource Include="baseline\*" LogicalName="baseline.%(Filename)%(Extension)" />
     <!-- ThunderStore Package -->
     <PackageFiles Include="package\**\*.*" />
   </ItemGroup>
@@ -73,7 +82,7 @@
             "website_url": "https://github.com/limitbrk/Labyrinthine-TellMeCosmetics",;
             "description": "Press `Tab` to check what cosmetic is currently in the area.",;
             "dependencies": [;
-            "LavaGang-MelonLoader-0.7.0";
+            "LavaGang-MelonLoader-0.7.3";
             ];
             }'
       Overwrite="true" />

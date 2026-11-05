@@ -33,6 +33,8 @@ public class CustomizationPickupFinderMod : MelonMod
         config = ConfigManager.Instance;
         Instance = this; // Store a reference to the instance
         LoggerInstance.Msg($"TellMeCosmetics Mod Loaded!!!");
+        // Read every maze scene from disk in the background so the lobby can predict mazes never entered.
+        ScenePreload.Start(config.DebugMazeTests.Value);
     }
 
     public override void OnSceneWasLoaded(int buildIndex, string sceneName)
@@ -186,8 +188,9 @@ public class CustomizationPickupFinderMod : MelonMod
 
     internal void CapturePool(RndCustomizationItemsManager mgr)
     {
-        ContractPredictor.Capture(mgr);
         var contract = Il2Cpp.GameValues.instance?.RandomMazeContract;
+        var pool = contract == null ? null : ContractPredictor.Capture(mgr, (int)contract.MazeType);
+        if (pool != null && this.config.DebugMazeTests.Value) ScenePreload.Check((int)contract.MazeType, null, pool);
         var maze = Il2Cpp.MazeGenerator.instance;
         // The end-to-end check simulates the whole maze again, so it only runs with DebugMazeTests.
         if (contract == null || maze == null || !this.config.DebugMazeTests.Value) return;
@@ -205,9 +208,10 @@ public class CustomizationPickupFinderMod : MelonMod
 
         var view = new ContractItemUI.View();
         bool simulated = false;
-        int? predicted = ContractPredictor.HasPool ? ContractPredictor.Predict(contract, out _, out simulated) : null;
-        // "?" until the pool and this maze type are learned: unsimulated seeds assume a first-attempt build and are often wrong.
-        if (!ContractPredictor.HasPool || !simulated) view.AltIcon = "?";
+        int? predicted = ContractPredictor.Predict(contract, out _, out simulated);
+        // "?" until this maze type's pool and generation are learned: unsimulated seeds assume a first-attempt build and are often wrong.
+        // Normal cases rarely drop a cosmetic, so they show nothing instead; only Rare/Hardcore get the "?".
+        if (!simulated) { if (contract.ContractType != ContractType.Normal) view.AltIcon = "?"; }
         else if (predicted is not int id) { } // no cosmetic: show nothing
         else
         {

@@ -83,12 +83,13 @@ public class ItemAlertUI
         this.myText.overflowMode = TextOverflowModes.Overflow;
     }
 
-    private void SetItemUI(string itemText, Sprite icon = null, char altIcon = '?')
+    private void SetItemUI(string itemText, Sprite icon = null, char altIcon = '?', bool silhouette = false)
     {
         this.myText.text = itemText;
         this.myText.fontStyle = FontStyles.Normal;
 
         this.iconImage.sprite = icon;
+        this.iconImage.material = silhouette ? ContractItemUI.SilhouetteMaterial() : null; // same white silhouette as the lobby card
         this.iconObject.SetActive(icon != null);
 
         this.iconAltImage.text = (icon == null) ? altIcon.ToString() : string.Empty;
@@ -103,32 +104,25 @@ public class ItemAlertUI
         // Check if components are initialized
         if (this.ui_object == null || this.myText == null || this.iconImage == null) return;
 
-        if (!reveal)
+        if (this.itemsCollection != null && this.itemID < this.itemsCollection.Length)
         {
-            this.SetItemUI("Undiscovered Item");
-        }
-        else if (this.itemsCollection != null && itemsCollection.Length >= 0)
-        {
-            if (this.itemID >= itemsCollection.Length)
-            {
-                throw new Exception("Out of itemID index to search");
-            }
             // DEV Still use array index as itemId
             CustomizationItem itemData = this.itemsCollection[this.itemID];
-            string basedItemDataname = Describe(itemData, this.itemID);
+            string basedItemDataname = reveal ? Describe(itemData, this.itemID) : "Undiscovered Item";
             switch (itemData.BodyPart)
             {
                 case BodyPart.Music:
                     this.SetItemUI(basedItemDataname, altIcon: '♫');
                     break;
                 default:
-                    this.SetItemUI(basedItemDataname, itemData.Icon);
+                    // Undiscovered items show only their white silhouette, like the lobby card.
+                    this.SetItemUI(basedItemDataname, itemData.Icon, silhouette: !reveal);
                     break;
             }
         }
         else
         {
-            this.SetItemUI($"#{this.itemID} {FilterClone(item.name)}");
+            this.SetItemUI(reveal ? $"#{this.itemID} {FilterClone(item.name)}" : "Undiscovered Item");
         }
     }
 

@@ -203,43 +203,93 @@ public static class MazePipeline
 
     private static readonly string cachePath = Path.Combine(MelonEnvironment.UserDataDirectory, "TellMeCosmetics.maze.bin");
     private static Dictionary<int, Config> configs;
-    private const int CacheVersion = 2;
+    private static readonly object gate = new(); // ScenePreload stores from a background thread
+    private const int CacheVersion = 3;
 
     public static Config Get(int mazeType)
     {
-        configs ??= Load();
-        return configs.TryGetValue(mazeType, out var c) ? c : null;
-    }
-
-    public static void Store(Config cfg)
-    {
-        configs ??= Load();
-        configs[cfg.MazeType] = cfg;
-        try
+        lock (gate)
         {
-            using var w = new BinaryWriter(File.Create(cachePath));
-            w.Write(CacheVersion);
-            w.Write(configs.Count);
-            foreach (var c in configs.Values) Write(w, c);
+            configs ??= Load();
+            return configs.TryGetValue(mazeType, out var c) ? c : null;
         }
-        catch (Exception ex) { MelonLogger.Warning($"Maze cache not saved: {ex.Message}"); return; }
-        configs = null; // reload from disk so every prediction also exercises the cache round trip
-
     }
 
+    // replace=false keeps a config already cached for this game build (preload must not overwrite an in-game capture).
+    public static void Store(Config cfg, bool replace = true)
+    {
+        lock (gate)
+        {
+            configs ??= Load();
+            if (!replace && configs.ContainsKey(cfg.MazeType)) return;
+            configs[cfg.MazeType] = cfg;
+            try
+            {
+                using var s = File.Create(cachePath);
+                Save(s, ScenePreload.Stamp, configs.Values);
+            }
+            catch (Exception ex) { MelonLogger.Warning($"Maze cache not saved: {ex.Message}"); return; }
+            configs = null; // reload from disk so every prediction also exercises the cache round trip
+        }
+    }
+
+    // A cache written by another game build reads as empty, so ScenePreload rebuilds it.
     private static Dictionary<int, Config> Load()
     {
         var result = new Dictionary<int, Config>();
         try
         {
             if (!File.Exists(cachePath)) return result;
-            using var r = new BinaryReader(File.OpenRead(cachePath));
-            if (r.ReadInt32() != CacheVersion) return result;
-            for (int n = r.ReadInt32(); n > 0; n--) { var c = Read(r); result[c.MazeType] = c; }
+            using var s = File.OpenRead(cachePath);
+            return Parse(s, ScenePreload.Stamp);
         }
         catch (Exception ex) { MelonLogger.Warning($"Maze cache unreadable: {ex.Message}"); result.Clear(); }
         return result;
     }
+
+    // Cache file format, shared with the baseline embedded in the mod. Another version or stamp parses as empty.
+    internal static void Save(Stream s, string stamp, IEnumerable<Config> cs)
+    {
+        using var w = new BinaryWriter(s, System.Text.Encoding.UTF8, true);
+        w.Write(CacheVersion);
+        w.Write(stamp);
+        w.Write(cs.Count());
+        foreach (var c in cs) Write(w, c);
+    }
+
+    internal static Dictionary<int, Config> Parse(Stream s, string stamp)
+    {
+        var result = new Dictionary<int, Config>();
+        using var r = new BinaryReader(s, System.Text.Encoding.UTF8, true);
+        if (r.ReadInt32() != CacheVersion || r.ReadString() != stamp) return result;
+        for (int n = r.ReadInt32(); n > 0; n--) { var c = Read(r); result[c.MazeType] = c; }
+        return result;
+    }
+
+    // Persisted fields as "name=value" lines, PrefabIds renumbered by first use (instance IDs in game, a counter in ScenePreload).
+    internal static string[] Dump(Config c)
+    {
+        var ms = new MemoryStream();
+        using (var w = new BinaryWriter(ms, System.Text.Encoding.UTF8, true)) Write(w, c);
+        ms.Position = 0;
+        var copy = Read(new BinaryReader(ms));
+        var ids = new Dictionary<int, int>();
+        foreach (var s in new[] { copy.Required, copy.Puzzles, copy.Landmarks }.Concat(copy.LandmarkObjectives.Values.Select(l => l.Landmarks))
+            .Where(a => a != null).SelectMany(a => a).Where(s => s != null))
+            s.PrefabId = s.PrefabId == 0 ? 0 : ids.TryGetValue(s.PrefabId, out var n) ? n : ids[s.PrefabId] = ids.Count + 1;
+        return typeof(Config).GetFields().Select(f => $"{f.Name}={Text(f.GetValue(copy))}").ToArray();
+    }
+
+    private static string Text(object o) => o switch
+    {
+        null => "null",
+        string s => s,
+        float f => f.ToString("R", System.Globalization.CultureInfo.InvariantCulture),
+        System.Collections.IDictionary d => "{" + string.Join(", ", d.Keys.Cast<object>().Select(k => $"{k}: {Text(d[k])}")) + "}",
+        System.Collections.IEnumerable e => "[" + string.Join(", ", e.Cast<object>().Select(Text)) + "]",
+        _ when o.GetType().IsPrimitive || o.GetType().IsEnum => Convert.ToString(o, System.Globalization.CultureInfo.InvariantCulture),
+        _ => "{" + string.Join(" ", o.GetType().GetFields().Where(f => f.Name != nameof(Structure.SupportsObjectives)).Select(f => $"{f.Name}={Text(f.GetValue(o))}")) + "}",
+    };
 
     private static void Write(BinaryWriter w, Config c)
     {
@@ -261,7 +311,7 @@ public static class MazePipeline
         });
     }
 
-    private static Config Read(BinaryReader r)
+    internal static Config Read(BinaryReader r)
     {
         var c = new Config
         {

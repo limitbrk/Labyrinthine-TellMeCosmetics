@@ -21,35 +21,60 @@ public static class ContractPredictor
     public record Pool(float[] Chance, Entry[] Normal, Entry[] Hardcore, Seasonal[] Seasonal);
 
     private const int Hardcore = 2; // ContractType.Hardcore
-    private static readonly string cachePath = Path.Combine(MelonEnvironment.UserDataDirectory, "TellMeCosmetics.pool.txt");
-    private static Pool pool;
+    // Each maze's spawners add their own possiblePrefabs to the global set, so the pool is cached per maze type.
+    private static string CachePath(int mazeType) => Path.Combine(MelonEnvironment.UserDataDirectory, "TellMeCosmetics", $"pool.{mazeType}.txt");
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<int, Pool> pools = new(); // ScenePreload stores from a background thread
 
-    public static bool HasPool => (pool ??= LoadCache()) != null;
+    internal static Pool GetPool(int mazeType) => pools.GetOrAdd(mazeType, LoadCache);
 
-    private static Pool LoadCache()
+    // Preload result; a pool already cached for this game build (an in-game capture) is kept.
+    internal static void StoreIfMissing(int mazeType, Pool pool)
+    {
+        if (GetPool(mazeType) != null) return;
+        pools[mazeType] = pool;
+        SaveCache(mazeType, pool);
+    }
+
+    private static Pool LoadCache(int mazeType)
     {
         try
         {
-            if (!File.Exists(cachePath)) return null;
-            var l = File.ReadAllLines(cachePath);
-            return new Pool(Split(l[0]).Select(F).ToArray(), Entries(Split(l[1])), Entries(Split(l[2])),
-                l.Skip(3).Select(Split).Select(t => new Seasonal(int.Parse(t[0]), F(t[1]), Entries(t[2..]))).ToArray());
+            var path = CachePath(mazeType);
+            if (!File.Exists(path)) return null;
+            return Parse(File.ReadAllLines(path), ScenePreload.Stamp);
         }
         catch (Exception ex) { MelonLogger.Warning($"Pool cache unreadable: {ex.Message}"); return null; }
     }
 
-    // Cache format: line 1 chances, line 2 normal pool, line 3 hardcore pool, then "type chance pool" per seasonal config. Entries are "id:weight".
+    // Line 0 is the game build stamp; a pool from another build parses as missing so ScenePreload rebuilds it.
+    internal static Pool Parse(string[] l, string stamp)
+    {
+        if (l.Length < 4 || l[0] != "v " + stamp) return null;
+        l = l[1..];
+        return new Pool(Split(l[0]).Select(F).ToArray(), Entries(Split(l[1])), Entries(Split(l[2])),
+            l.Skip(3).Select(Split).Select(t => new Seasonal(int.Parse(t[0]), F(t[1]), Entries(t[2..]))).ToArray());
+    }
+
+    internal static string[] FileLines(Pool pool, string stamp) => Lines(pool).Prepend("v " + stamp).ToArray();
+
+    // Cache format: line 0 "v <build stamp>", line 1 chances, line 2 normal pool, line 3 hardcore pool, then "type chance pool" per seasonal config. Entries are "id:weight".
     private static string[] Split(string line) => line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
     private static float F(string v) => float.Parse(v, CultureInfo.InvariantCulture);
     private static string S(float v) => v.ToString("R", CultureInfo.InvariantCulture);
     private static Entry[] Entries(string[] t) => t.Select(x => x.Split(':')).Select(x => new Entry(int.Parse(x[0]), F(x[1]))).ToArray();
     private static string Line(Entry[] e) => string.Join(" ", e.Select(x => $"{x.Id}:{S(x.W)}"));
 
-    private static void SaveCache()
+    internal static string[] Lines(Pool pool) => new[] { string.Join(" ", pool.Chance.Select(S)), Line(pool.Normal), Line(pool.Hardcore) }
+        .Concat(pool.Seasonal.Select(c => $"{c.Type} {S(c.Chance)} {Line(c.Prefabs)}")).ToArray();
+
+    private static void SaveCache(int mazeType, Pool pool)
     {
-        var lines = new[] { string.Join(" ", pool.Chance.Select(S)), Line(pool.Normal), Line(pool.Hardcore) }
-            .Concat(pool.Seasonal.Select(c => $"{c.Type} {S(c.Chance)} {Line(c.Prefabs)}"));
-        try { File.WriteAllLines(cachePath, lines); }
+        var lines = FileLines(pool, ScenePreload.Stamp);
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(CachePath(mazeType)));
+            File.WriteAllLines(CachePath(mazeType), lines);
+        }
         catch (Exception ex) { MelonLogger.Warning($"Pool cache not saved: {ex.Message}"); }
     }
 
@@ -63,23 +88,24 @@ public static class ContractPredictor
             .Concat(ToEntries(hardcore ? s.possiblePrefabsHardcore : s.possiblePrefabs)).ToArray();
 
     // Call in the maze scene, right before the game rolls the cosmetic.
-    public static void Capture(RndCustomizationItemsManager mgr)
+    public static Pool Capture(RndCustomizationItemsManager mgr, int mazeType)
     {
         var spawners = UnityEngine.Object.FindObjectsOfType<RndCustomizationSpawner>();
-        if (mgr == null || spawners.Length == 0) return;
+        if (mgr == null || spawners.Length == 0) return null;
 
         var normal = SpawnerPool(spawners[0], false);
         // Spawn() adds the spawner's own possiblePrefabs; if spawners differ the lobby prediction depends on which spawner gets picked.
         if (spawners.Any(s => !SpawnerPool(s, false).SequenceEqual(normal)))
             MelonLogger.Warning("RndCustomizationSpawners have different pools; lobby prediction may be wrong for this maze.");
 
-        pool = new Pool(
+        var pool = pools[mazeType] = new Pool(
             mgr.chanceForItem.ToArray(),
             normal,
             SpawnerPool(spawners[0], true),
             mgr.seasonalItems.ToArray().Where(c => c != null)
                 .Select(c => new Seasonal((int)c.seasonalEventType, c.chance, ToEntries(c.prefabs))).ToArray());
-        SaveCache();
+        SaveCache(mazeType, pool);
+        return pool;
     }
 
     // WeightedRandom.PickRandom: first entry where acc + w >= NextDouble() * Σw, else the last one.
@@ -124,13 +150,14 @@ public static class ContractPredictor
 
     /// <summary>
     /// Cosmetic ItemID the contract's maze will spawn, or null when the spawn-chance roll fails.
-    /// simulated=false means the maze type was never captured, so the seeds assume the maze builds on its first attempt.
+    /// simulated=false means the maze type was never captured (no pool, or seeds assume the maze builds on its first attempt).
     /// </summary>
     public static int? Predict(Contract contract, out float chance, out bool simulated)
     {
         chance = 0;
         simulated = false;
-        if (!HasPool) return null;
+        var pool = GetPool((int)contract.MazeType);
+        if (pool == null) return null;
         var (seed, second, sim) = MazeSeeds(contract);
         simulated = sim;
         int type = (int)contract.ContractType;
