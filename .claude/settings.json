@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "rea": {
+      "source": {
+        "source": "git",
+        "url": "https://github.com/morluto/rea.git"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "rea@rea": true
+  }
+}

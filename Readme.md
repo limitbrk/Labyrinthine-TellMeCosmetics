@@ -1,82 +1,133 @@
 # Labyrinthine - Tell Me Cosmetics
-`Press Tab` to display what cosmetics will get in-game.
-### Case: Discovered item
-![mod example](docs/Mod_Example1.png)
-### Case: Discovered music item
-![mod example](docs/Mod_Example3_MusicDisc.png)
-### Case: Undiscovered item when `RevealAllItems=false`
-![mod example](docs/Mod_Example2_Undiscovered.png)
-### Case: When picked up
-![mod example](docs/Mod_Example4_Pickup_Item.png)
+Know which cosmetic a map has **before** you find it.
 
+- **In a maze:** press `Tab` to see the cosmetic in this map.
+- **In the lobby (Beta):** each contract shows the cosmetic it will give.
+
+> [!WARNING]
+> Lobby prediction is **Beta** and may have bugs. If the mod causes problems, use the older [v0.1.5](https://github.com/limitbrk/Labyrinthine-TellMeCosmetics/releases/tag/v0.1.5) instead.
+
+## Examples
+### In a maze (press `Tab`)
+The item shows at the bottom-left of the screen:
+
+![in-game example](docs/Mod_Example9_InGame.png)
+
+<table>
+<tr><th></th><th>Discovered</th><th>Undiscovered</th></tr>
+<tr><th>Item</th><td><img src="docs/Mod_Example10_Discovered.png" width="360" alt="discovered item"></td><td><img src="docs/Mod_Example6_Undiscovered.png" width="360" alt="undiscovered item"></td></tr>
+<tr><th>Music disc</th><td><img src="docs/Mod_Example3_MusicDisc.png" width="360" alt="music disc"></td><td><img src="docs/Mod_Example8_Undiscovered_Music.png" width="360" alt="undiscovered music disc"></td></tr>
+<tr><th>Picked up</th><td><img src="docs/Mod_Example11_Discovered_Found.png" width="360" alt="picked up discovered item"></td><td><img src="docs/Mod_Example7_Undiscovered_Found.png" width="360" alt="picked up undiscovered item"></td></tr>
+</table>
+
+- **Undiscovered:** shows only the silhouette and `Undiscovered Item` (when `RevealAllItems=false`).
+- **Picked up:** the name is crossed out.
+
+### Contract board in the lobby
+> [!WARNING]
+> **Beta.** Lobby prediction is new. It may be wrong after a game update or for maze types it has not seen yet. Please report wrong predictions in [Issues](https://github.com/limitbrk/Labyrinthine-TellMeCosmetics/issues).
+
+![lobby contract board](docs/Mod_Example5_Lobby.png)
+
+How to read the card under each contract photo:
+
+| You see | Meaning |
+|---|---|
+| Item picture (polaroid) | This cosmetic will spawn |
+| Red `NEW` badge + white silhouette | You have not unlocked this item yet (shown in full when `RevealAllItems=true`) |
+| `?` card | The mod does not know this maze type yet. Enter **one map of that type once** to teach it |
+| No card | No cosmetic will spawn for this contract |
+
+<details>
+<summary>How it works</summary>
+
+- The mod replays the game's maze generation (including failed build attempts) to find the seeds used for the cosmetic roll, so a known maze type gives an exact result.
+- Every maze type (DLC Egypt included) is known out of the box for the game version the mod was built against. The mod checks the game version on every launch.
+- After a game update, the mod reads each maze's settings and cosmetic pool from the game files in the background on launch (DLC mazes too, when installed).
+</details>
 
 ## Installation
-### With Mod Manager
-Avaliable in ThunderStore.io https://thunderstore.io/c/labyrinthine/p/LimitBRK/TellMeCosmetics/
-### No-Mod Manager 
-1. Download and install [MelonLoader](https://melonwiki.xyz) (Must v0.7.0+)
-2. Download the latest mod `.dll` [RELEASE](https://github.com/limitbrk/Labyrinthine-TellMeCosmetics/releases/latest) (Recommend latest)
-3. Copy `.dll` into the folder `Mods` in the game folder.
+### With a mod manager
+Available on Thunderstore: https://thunderstore.io/c/labyrinthine/p/LimitBRK/TellMeCosmetics/
 
+### Manual
+1. Install [MelonLoader](https://melonwiki.xyz) **v0.7.3 or newer**.
+2. Download the latest `.dll` from [Releases](https://github.com/limitbrk/Labyrinthine-TellMeCosmetics/releases/latest).
+3. Copy the `.dll` into the `Mods` folder in the game folder.
 
-## Mod Setting
-When game started onces. Please close game. Then file `Mods/TellMeCosmetics_config.cfg` will created with these setting
+## Settings
+Start the game once, then close it. The file `Mods/TellMeCosmetics_config.cfg` is created:
 ```ini
 [Gameplay]
 RevealAllItems = false
+DebugMazeTests = false
 ```
-- `RevealAllItems`: Show every item name, including undiscovered items. (Default is `false`)
+| Setting | Default | Description |
+|---|---|---|
+| `RevealAllItems` | `false` | Show every item, including ones you have not discovered |
+| `DebugMazeTests` | `false` | Developer only. Compares each maze generation step with the game and logs `MATCH`/`MISMATCH`. Makes map loading slower |
 
-&nbsp;
+<details>
+<summary>Cache files</summary>
 
-(Optional) to hide **MelonLoader** process you can set Launch Option as...
+Learned data is saved in `UserData/TellMeCosmetics/pool.<mazeType>.txt` (cosmetic pool) and `UserData/TellMeCosmetics.maze.bin` (maze settings per maze type), stamped with the game version. They are rebuilt automatically after a game update. Entering a maze overwrites that maze type with what the game actually holds. With `DebugMazeTests` on, entering a maze also logs `🧪Preload ... MATCH/MISMATCH` comparing the preloaded values with the game's.
+</details>
+
+### (Optional) Hide MelonLoader windows
+Add to the game's Steam launch options:
 ```yaml
 --melonloader.disablestartscreen --melonloader.hideconsole
 ```
+- `--melonloader.disablestartscreen`: hide the MelonLoader splash screen
+- `--melonloader.hideconsole`: hide the console window (logs are still saved)
 
-  - `--melonloader.disablestartscreen`: Disable Melon Loader Splash Screen
-  - `--melonloader.hideconsole`: Disable Console Popup (Still save logs)
+## Status
+- **Beta** — lobby contract prediction
+- Tested only on **Windows 11 AMD x64**
 
-## Mod Status
-**ONLY Tested on Windows 11 AMDx64** 
+### Features
+- [x] Show the cosmetic item in the Labyrinth map
+- [x] Show the item name instead of the item ID
+- [x] Show the item image
+- [x] Mask locked items (non-OP mode)
+- [x] Mark the UI when an item is picked up
+- [x] Show the item from the lobby contract, without loading the map (Beta)
+- [x] Tweak UI
+- ~~Fade in/out animation~~ _(cancelled)_
 
-## Features Plan
-- [x] **Display Case's Cosmetics item** - From ~~Cases board~~ Labyrinth Map
-- [x] **Show Item Name** - Display the actual item name instead of the item ID.
-- [x] **Show Image of Cosmetics Item** - only item name don't know how it's look
-- [X] **Masked Locked Items** - For Non-OP mods
-- [X] **Mark UI when an item is picked up** -  to help users track their progress.
-- ~~**(Cancelled) Tweak UI** - more readable~~ _(I'm lack Unity UI skill to made this)_
-- ~~**(Cancelled) Animation** - Fade in / out?~~ 
-- ~~**(Cancelled) GetItem from Lobby** - Know Item by seeds without loading world~~ _(Still looking for seeding machanics)_
+### Known issues
+- MelonLoader makes the game take long to launch.
+- Minor lag or freeze when a player joins.
 
-## Known Issues
-I'm not a Unity developer but I tried to search solution
-- MelonLoader launch game too long...
-- Minor lag or freeze when a player joins the game.
-- ~~(Fixed) Mod's UI __Dissapeared__ when Recreated lobby~~
-- ~~(Fixed) Disc show wrong itemname~~
-![bug01](docs/B01_Disc_no_icon.png)
-- ~~(Fixed) Sometimes Crash~~
-- ~~(Fixed) FrameDrop/Freezing sometimes when load map~~
-- ~~(Fixed in ML v0.6.6) MelonLoader Make SteamUI Bug~~
+<details>
+<summary>Fixed issues</summary>
+
+- Mod UI disappeared when the lobby was recreated
+- Disc showed the wrong item name
+  ![bug01](docs/B01_Disc_no_icon.png)
+- Occasional crash
+- Frame drop / freeze when loading a map
+- MelonLoader caused a Steam UI bug (fixed in ML v0.6.6)
+</details>
 
 &nbsp;
-&nbsp;
+
 # Contribution
-Here are details if you want to continue my job ;)
+Here are details if you want to continue my work ;)
 
 ## Dev Requirement
-- **ModLoader:** [MelonLoader](https://melonwiki.xyz) v0.6.6+
+- **ModLoader:** [MelonLoader](https://melonwiki.xyz) v0.7.3+
 - **AssetSearch:** [UnityExplorer (Forked)](https://github.com/GrahamKracker/UnityExplorer) - Original not worked
 - **RevEngCode:** [dnSpy](https://github.com/dnSpy/dnSpy)
 - .Net SDK 6.0
 
-## Build It Youself
+## Build It Yourself
 1. **Assembly file:** Copy these files `MelonLoader` folder to repo `dlls`
 ```cs
 - MelonLoader\Il2CppAssemblies\Assembly-CSharp.dll
 - MelonLoader\Il2CppAssemblies\Il2Cppmscorlib.dll
+- MelonLoader\Il2CppAssemblies\Il2CppSystem.Core.dll
+- MelonLoader\Il2CppAssemblies\Il2CppBehaviorDesigner.Runtime.dll
 - MelonLoader\Il2CppAssemblies\Unity.TextMeshPro.dll
 - MelonLoader\Il2CppAssemblies\UnityEngine.CoreModule.dll
 - Labyrinthine\MelonLoader\net6\Il2CppInterop.Runtime.dll
@@ -95,8 +146,6 @@ $ dotnet build
 - SecondSeed
 - ExcludedCustomizationItemIDs
 
-*** Not found cosmetics selection logic from seed yet. (Behavior - **Re-Enter** map will same spawned)
-
 ### Cosmetic Item (Lobby)
 `Il2CppCharacterCustomization.CustomizationItem`
 - icon (Image)
@@ -109,3 +158,37 @@ $ dotnet build
 ### Optional - Save Check 
 `Il2CppCharacterCustomization.CustomizationSave`
 - IsItemUnlocked(Reference itemID)
+
+### How the game picks the cosmetic
+Runs in the maze scene (`RndCustomizationItemsManager.SpawnCustomizationItems` → `RndCustomizationSpawner.Spawn`):
+1. **Is there an item?** Yes if `chanceForItem[ContractType] > new Random(SecondSeed).NextDouble()`.
+2. **Seasonal event?** If an event is on (not Hardcore), use the event items if `chance > new Random(SecondSeed + 0x12B5).NextDouble()`.
+3. **Normal list:** otherwise the list is `globalPrefabs.Value` + the spawner's `possiblePrefabs` (Hardcore uses the `*Hardcore` lists).
+4. **Pick one:** `new Random((SecondSeed + 0x23E3 + Seed + 0x692) / 2)` picks by weight, up to 50 tries, skipping `ExcludedCustomizationItemIDs`.
+
+**The catch:** when a maze build fails, the game tries again with new seeds (`Seed += 0x4A3`, `SecondSeed += 0x18C1`). After 10 fails the map grows by 5 and `Seed` resets. So to predict the item, the lobby must know how many builds fail.
+
+### Maze generation (replayed in the lobby)
+To count failed builds, `src/Predict` copies the game's maze builder (`MazeGenerator.GenerateMap` → `CreateMaze` → `GenerateNewMaze`):
+
+| File | Step |
+|---|---|
+| `MazeSim` | layout, start/end |
+| `MazeSubmazes` | submazes, transitions |
+| `MazeStructures` | landmarks, puzzles |
+| `MazeChecks` | exit path (A*), unreachable areas/landmarks, safe zones |
+| `MazeWaypoints` | AI waypoints |
+| `MazePipeline` | runs all steps in order |
+
+- `MazeCapture` saves each maze type's settings when you enter a maze.
+- Each `*Test.cs` compares one step with the game (only when `DebugMazeTests` is on).
+
+### Where maze settings come from
+- **`baseline/`:** caches built into the mod. Used only when the game version (and `GameAssembly.dll` size) match.
+- **`ScenePreload`:** if the version differs, it reads the settings from `Labyrinthine_Data/level*` at startup with AssetsTools.NET (comes with MelonLoader). The game files have no type trees, so `Il2CppLayouts` gets each script's field layout from il2cpp reflection.
+- **DLC mazes** are Addressables scenes. `ScenePreload` finds the scene from its key in `MazeTypesConfigSO` using `StreamingAssets/aa/catalog.json` and the bundle's `AssetBundle.m_SceneHashes`, then reads it from the bundle.
+
+**Update `baseline/` for a new game version:**
+1. Launch the game and enter each DLC maze once.
+2. Copy `UserData/TellMeCosmetics.maze.bin` and `UserData/TellMeCosmetics/pool.*.txt` into `baseline/`.
+

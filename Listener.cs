@@ -1,5 +1,6 @@
 using HarmonyLib;
 using Il2CppCharacterCustomization;
+using Il2CppRandomGeneration.Contracts;
 
 namespace TellMeCosmetics;
 
@@ -16,6 +17,24 @@ class Customization_PickUpListener
 {
     static void Postfix(CustomizationPickup __instance){
         CustomizationPickupFinderMod.Instance?.Pickup(__instance.ItemID);
+    }
+}
+
+[HarmonyPatch(typeof(RndCustomizationItemsManager), nameof(RndCustomizationItemsManager.SpawnCustomizationItems))]
+class Customization_RndSpawnListener
+{
+    static void Prefix(RndCustomizationItemsManager __instance)
+    {
+        CustomizationPickupFinderMod.Instance?.CapturePool(__instance);
+    }
+}
+
+[HarmonyPatch(typeof(ContractUI), nameof(ContractUI.UpdateUI))]
+class Contract_UpdateUIListener
+{
+    static void Postfix(ContractUI __instance)
+    {
+        CustomizationPickupFinderMod.Instance?.ShowPrediction(__instance);
     }
 }
 

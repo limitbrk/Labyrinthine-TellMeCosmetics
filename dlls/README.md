@@ -5,4 +5,5 @@
 - MelonLoader\Il2CppAssemblies\Unity.TextMeshPro.dll
 - MelonLoader\Il2CppAssemblies\UnityEngine.CoreModule.dll
 - Labyrinthine\MelonLoader\net6\Il2CppInterop.Runtime.dll
+- Labyrinthine\MelonLoader\net6\AssetsTools.NET.dll
 ```
