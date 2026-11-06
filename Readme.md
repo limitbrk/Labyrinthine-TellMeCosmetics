@@ -221,6 +221,7 @@ To count failed builds, `src/Predict` copies the game's maze builder (`MazeGener
 
 
 ### Performance Test Result
+#### Preload
 Time for `ScenePreload` to read each maze type's data (`ReadAll` → `ReadScene`), measured offline on game 1.0.3 (6 runs; Ryzen 7 7735HS, 32 GB RAM, NVMe SSD). All 21 results matched `baseline/`.
 
 | Maze type | Map | First run (ms) | Median (ms) |
@@ -250,3 +251,18 @@ Time for `ScenePreload` to read each maze type's data (`ReadAll` → `ReadScene`
 
 - Maze_A also loads the shared asset files used by the other maps.
 - Runs on a background thread at startup and only when the game version does not match `baseline/`. The log shows the time per maze type: `Preload: ... per maze type [...]`.
+
+#### Predict
+Time for one lobby prediction: replaying maze generation from the contract's seeds (`MazePipeline.Simulate`) to find the seeds the cosmetic roll uses. Measured in-game on game 1.0.3 with `DebugPerfTest` (100 fixed random seeds per maze type, map size taken from a lobby contract).
+
+| Maze type | Map | Failed builds (avg) | Before avg (ms) | Before max (ms) | After avg (ms) | After p95 (ms) | After max (ms) |
+|---|---|---|---|---|---|---|---|
+| 5 | 43x31 | 0.21 | 44.32 | 107.64 | 18.20 | 26.43 | 38.83 |
+| 9 | 17x15 | 14.59 | 99.51 | 203.06 | 27.32 | 52.37 | 69.95 |
+| 13 | 34x31 | 0.80 | 92.94 | 434.08 | 34.51 | 107.17 | 157.54 |
+| 14 | 9x9 | 8.30 | 7.92 | 35.35 | 3.24 | 8.21 | 16.73 |
+| 15 | 18x16 | 11.67 | 133.87 | 290.18 | 40.02 | 66.04 | 96.79 |
+
+- Before: the replay called the game's `UnityEngine.Random` / `Il2CppSystem.Random` through Il2Cpp interop, on the main thread (the lobby froze while it ran).
+- After: C# copies of both RNGs (`GameRandom.cs`, checked by `GameRandomTest`), about 3-4x faster, and the replay runs on a background thread. Cards show the game's loading icon until the result is ready.
+- Cost grows with failed builds (each one is a full maze build) and map area.
