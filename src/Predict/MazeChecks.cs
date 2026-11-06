@@ -333,7 +333,7 @@ public static class MazeChecks
         for (int gy = 0; gy < cellsY; gy++)
             for (int gx = 0; gx < cellsX; gx++) gridCells.Add((gx, gy));
 
-        var rnd = new Il2CppSystem.Random(unchecked(s.SecondSeed + 0xad));
+        var rnd = new NetRandom(unchecked(s.SecondSeed + 0xad));
         var cands = new List<(int x, int y)>();
         int placed = 0;
         while (tries > 0)

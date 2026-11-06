@@ -29,7 +29,7 @@ public static class MazeStructures
     public sealed class Settings { public int StructureAttempts, EdgeDist, OtherDist; public bool CanChangeDist; }
 
     public static int InsertWithFewTries(MazeSubmazes.State s, Settings cfg, List<Placed> spawned, Structure[] arr, int count,
-        Il2CppSystem.Random rnd, List<Placed> outList, bool addRandom, bool checkSize)
+        NetRandom rnd, List<Placed> outList, bool addRandom, bool checkSize)
     {
         for (int t = 0; t <= 2; t++)
         {
@@ -40,7 +40,7 @@ public static class MazeStructures
         return 0;
     }
 
-    private static int[] RandomIndexArrayDistinct(MazeSubmazes.State s, Settings cfg, Structure[] arr, int count, Il2CppSystem.Random rnd, bool addRandom, bool checkSize)
+    private static int[] RandomIndexArrayDistinct(MazeSubmazes.State s, Settings cfg, Structure[] arr, int count, NetRandom rnd, bool addRandom, bool checkSize)
     {
         var result = new int[count];
         var avail = new List<int>(arr.Length);
@@ -69,7 +69,7 @@ public static class MazeStructures
     }
 
     private static int Insert(MazeSubmazes.State s, Settings cfg, List<Placed> spawned, Structure[] arr, int count,
-        Il2CppSystem.Random rnd, List<Placed> outList, bool addRandom, bool checkSize)
+        NetRandom rnd, List<Placed> outList, bool addRandom, bool checkSize)
     {
         if (arr == null || arr.Length == 0) return 0;
         var backup = (int[,])s.Map.Clone();

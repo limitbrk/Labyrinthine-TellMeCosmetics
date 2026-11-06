@@ -10,16 +10,9 @@ namespace TellMeCosmetics.Predict;
 class MazeSubmazesTest
 {
     static bool Prepare() => TellMeCosmetics.Config.ConfigManager.Instance.DebugMazeTests.Value;
-    internal static Il2CppSystem.Random CloneRandom(Il2CppSystem.Random r)
-    {
-        var c = new Il2CppSystem.Random(0);
-        c._seedArray = new Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppStructArray<int>(r._seedArray.ToArray());
-        c._inext = r._inext;
-        c._inextp = r._inextp;
-        return c;
-    }
+    internal static NetRandom CloneRandom(Il2CppSystem.Random r) => new(r._seedArray.ToArray(), r._inext, r._inextp);
 
-    internal static bool SameRandom(Il2CppSystem.Random a, Il2CppSystem.Random b) =>
+    internal static bool SameRandom(Il2CppSystem.Random a, NetRandom b) =>
         a._inext == b._inext && a._inextp == b._inextp && a._seedArray.SequenceEqual(b._seedArray);
 
     internal static int[,] ReadMap(MazeMap m)
@@ -35,7 +28,7 @@ class MazeSubmazesTest
     internal static int ReadInt2D(System.IntPtr arr, int cols, int x, int y) =>
         System.Runtime.InteropServices.Marshal.ReadInt32(arr, 0x20 + (x * cols + y) * 4);
 
-    static void Prefix(MazeGenerator __instance, Il2CppSystem.Random random, out (MazeSubmazes.State s, Il2CppSystem.Random r) __state)
+    static void Prefix(MazeGenerator __instance, Il2CppSystem.Random random, out (MazeSubmazes.State s, NetRandom r) __state)
     {
         var g = __instance;
         var dg = g.dataGenerator;
@@ -55,7 +48,7 @@ class MazeSubmazesTest
         __state = (s, CloneRandom(random));
     }
 
-    static void Postfix(MazeGenerator __instance, Il2CppSystem.Random random, bool __result, (MazeSubmazes.State s, Il2CppSystem.Random r) __state)
+    static void Postfix(MazeGenerator __instance, Il2CppSystem.Random random, bool __result, (MazeSubmazes.State s, NetRandom r) __state)
     {
         var (s, r) = __state;
         bool sim = MazeSubmazes.SetupSubmazes(s, r);

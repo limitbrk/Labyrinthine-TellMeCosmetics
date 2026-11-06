@@ -29,7 +29,7 @@ public static class MazeSubmazes
     private static bool InMaze(State s, int x, int y) => x >= 0 && y >= 0 && x < s.MazeX && y < s.MazeY;
     private static int Tile(State s, int x, int y) => s.Map[x, y];
 
-    public static bool SetupSubmazes(State s, Il2CppSystem.Random rnd)
+    public static bool SetupSubmazes(State s, NetRandom rnd)
     {
         s.Types = new int[s.MazeX, s.MazeY];
         s.Transitions?.Clear();
@@ -61,7 +61,7 @@ public static class MazeSubmazes
         return (float)System.Math.Sqrt(dy * dy + dx * dx);
     }
 
-    private static bool TryToPlaceSubmaze(State s, int i, Il2CppSystem.Random rnd)
+    private static bool TryToPlaceSubmaze(State s, int i, NetRandom rnd)
     {
         if (s.Subs[i].RadiusMax <= 0) return false;
         for (int t = 0; t < 100; t++)

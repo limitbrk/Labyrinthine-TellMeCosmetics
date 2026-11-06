@@ -52,6 +52,7 @@ public class CustomizationPickupFinderMod : MelonMod
     public override void OnSceneWasInitialized(int buildIndex, string sceneName)
     {
         LoggerInstance.Msg($"SCENE {buildIndex}/{sceneName} Initialized!");
+        if (buildIndex == 1 && config.DebugMazeTests.Value) GameRandomTest.Run();
         // Init UI 
         if (buildIndex >= 1 && sceneName == "MainMenu")
         {
@@ -201,6 +202,27 @@ public class CustomizationPickupFinderMod : MelonMod
             + $" | 🎯Pipeline {(!simulated ? "NOT SIMULATED" : seedsOk ? "MATCH" : "MISMATCH")} predicted {seed}/{second} actual {maze.seed}/{maze.secondSeed} (contract {contract.Seed}/{contract.SecondSeed})");
     }
 
+    private readonly System.Collections.Generic.HashSet<IntPtr> waiting = new(); // contract cards with a ShowWhenReady running
+
+    // Spins the card's loading icon until the background maze simulation is done, then shows the result.
+    private IEnumerator ShowWhenReady(ContractUI ui)
+    {
+        var ptr = ui.Pointer;
+        try
+        {
+            while (true)
+            {
+                yield return null;
+                if (ui == null || ui.Contract == null) yield break; // lobby unloaded
+                ContractPredictor.Predict(ui.Contract, false, out _, out _, out bool pending);
+                if (!pending) break;
+                ContractItemUI.Spin(ui);
+            }
+        }
+        finally { waiting.Remove(ptr); }
+        ShowPrediction(ui);
+    }
+
     internal void ShowPrediction(ContractUI ui)
     {
         var contract = ui.Contract;
@@ -208,7 +230,14 @@ public class CustomizationPickupFinderMod : MelonMod
 
         var view = new ContractItemUI.View();
         bool simulated = false;
-        int? predicted = ContractPredictor.Predict(contract, out _, out simulated);
+        int? predicted = ContractPredictor.Predict(contract, false, out _, out simulated, out bool pending);
+        if (pending)
+        {
+            view.Loading = true;
+            ContractItemUI.Show(ui, view);
+            if (waiting.Add(ui.Pointer)) MelonCoroutines.Start(ShowWhenReady(ui));
+            return;
+        }
         // "?" until this maze type's pool and generation are learned: unsimulated seeds assume a first-attempt build and are often wrong.
         // Normal cases rarely drop a cosmetic, so they show nothing instead; only Rare/Hardcore get the "?".
         if (!simulated) { if (contract.ContractType != ContractType.Normal) view.AltIcon = "?"; }

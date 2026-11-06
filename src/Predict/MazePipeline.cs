@@ -45,8 +45,8 @@ public static class MazePipeline
     public static int SelectObjectiveSet(Config cfg, ContractInput c)
     {
         if (cfg.Sets == null || cfg.Sets.Length == 0) return -1;
-        var seeder = new Il2CppSystem.Random(unchecked(c.SecondSeed + 0x1529));
-        var rnd = new Il2CppSystem.Random(seeder.Next(100000000, 999999999));
+        var seeder = new NetRandom(unchecked(c.SecondSeed + 0x1529));
+        var rnd = new NetRandom(seeder.Next(100000000, 999999999));
         var left = Enumerable.Range(0, cfg.Sets.Length).ToList();
         while (left.Count > 0)
         {
@@ -63,11 +63,10 @@ public static class MazePipeline
 
     // ---------- full GenerateMap ----------
 
+    private static readonly object simGate = new(); // Run marks Structure.SupportsObjectives on the shared config, so one simulation at a time
     public static Outcome Simulate(Config cfg, ContractInput c)
     {
-        var saved = UnityEngine.Random.state;
-        try { return Run(cfg, c); }
-        finally { UnityEngine.Random.state = saved; }
+        lock (simGate) return Run(cfg, c);
     }
 
     private static Outcome Run(Config cfg, ContractInput c)
@@ -157,7 +156,7 @@ public static class MazePipeline
         if ((uint)s.Start.x < (uint)s.Map.GetLength(0) && (uint)s.Start.y < (uint)s.Map.GetLength(1)) s.Map[s.Start.x, s.Start.y] = MazeSubmazes.StartTile;
         if ((uint)s.End.x < (uint)s.Map.GetLength(0) && (uint)s.End.y < (uint)s.Map.GetLength(1)) s.Map[s.End.x, s.End.y] = MazeSubmazes.EndTile;
 
-        var rnd = new Il2CppSystem.Random(s.SecondSeed);
+        var rnd = new NetRandom(s.SecondSeed);
         for (int i = 0; i < cfg.SubmazeTries; i++)
             if (MazeSubmazes.SetupSubmazes(s, rnd)) break;
 

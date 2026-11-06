@@ -8,7 +8,7 @@ Know which cosmetic a map has **before** you find it.
 
 > **⚠️ Use at your own risk:** This is an unofficial fan-made mod, not affiliated with or supported by the Labyrinthine developers. Mods may cause unexpected bugs, crashes, or save-related issues. If you encounter any problems with this mod, please [report them here](https://github.com/limitbrk/Labyrinthine-TellMeCosmetics/issues/new) rather than contacting the game developers.
 >
-> **A note on gameplay:** This mod is designed as a convenience tool. Knowing rewards in advance may take away some of the mystery, challenge, and sense of discovery that make the game enjoyable. Since it can spoil the surprise for others, I recommend using it only with friends or in a private lobby with people you know. If you're new to the game, I strongly encourage you to play it without the mod first, the way it was meant to be experienced.
+> **A note on gameplay:** This mod is designed as a convenience tool. Knowing rewards in advance may take away some of the mystery, challenge, and sense of discovery that make the game enjoyable. Since it can spoil the surprise for others, I recommend using it only with friends or in a private lobby with people you know. If you're new to the game, I strongly recommend playing without the mod first to get the best experience and discover everything as the developers intended.
 
 ## Examples
 ### In a maze (press `Tab`)
@@ -71,11 +71,13 @@ Start the game once, then close it. The file `Mods/TellMeCosmetics_config.cfg` i
 [Gameplay]
 RevealAllItems = false
 DebugMazeTests = false
+DebugPerfTest = false
 ```
 | Setting | Default | Description |
 |---|---|---|
 | `RevealAllItems` | `false` | Show every item, including ones you have not discovered |
 | `DebugMazeTests` | `false` | Developer only. Compares each maze generation step with the game and logs `MATCH`/`MISMATCH`. Makes map loading slower |
+| `DebugPerfTest` | `false` | Developer only. In the lobby, times 100 maze simulations per maze type and logs `⏱️Perf`. The lobby stutters while it runs |
 
 ### (Optional) Hide MelonLoader windows
 Add to the game's Steam launch options:

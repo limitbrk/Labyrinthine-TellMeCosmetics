@@ -31,10 +31,7 @@ class MazeSimTest
     static void Postfix(MazeDataGenerator __instance, MazeMap __result, MazeSim.Input __state)
     {
         if (__state == null || __result == null) return;
-        var saved = UnityEngine.Random.state;
-        MazeSim.Result sim;
-        try { sim = MazeSim.DataFromDimensions(__state); }
-        finally { UnityEngine.Random.state = saved; }
+        var sim = MazeSim.DataFromDimensions(__state);
 
         int diff = 0, firstX = -1, firstY = -1;
         bool sizeOk = sim.Map.GetLength(0) == __result.SizeX && sim.Map.GetLength(1) == __result.SizeY;

@@ -22,12 +22,17 @@ public static class ContractItemUI
         public string AltIcon;    // "?" or "♫"
         public bool Silhouette;   // item not unlocked yet
         public bool New;          // not unlocked yet → NEW badge
+        public bool Loading;      // prediction still computing → the game's spinning loading icon
     }
 
     public static void Show(ContractUI ui, View view)
     {
         var root = ui.transform.Find(Name)?.gameObject ?? Create(ui);
-        bool any = view.Icon != null || !string.IsNullOrEmpty(view.AltIcon);
+        var spinner = root.transform.Find("Spinner").gameObject;
+        bool loading = view.Loading && LoadingSprite() != null;
+        if (view.Loading && !loading) view.AltIcon = "…"; // icon unreadable (game update moved it)
+        spinner.SetActive(loading);
+        bool any = loading || view.Icon != null || !string.IsNullOrEmpty(view.AltIcon);
         root.SetActive(any);
         var alt = root.transform.Find("Alt").GetComponent<TextMeshProUGUI>();
         if (!any)
@@ -52,7 +57,7 @@ public static class ContractItemUI
 
     private const string NoteName = "TMC Note";
 
-    // Hint on the board's bottom-right frame, below the custom contract, shown while any card shows "?".
+    // Hint on the cork below the custom contract and its SETTINGS sign, shown while any card shows "?".
     private static void UpdateNote(ContractUI ui)
     {
         // The custom contract hangs under a different parent than the regular ones, so look at every contract in the scene.
@@ -80,8 +85,10 @@ public static class ContractItemUI
     private static Transform CreateNote(ContractUI anchor)
     {
         var text = anchor.infoText.transform;
-        // The contract hangs askew; the frame does not, so the note stays level with the world's up.
-        Vector3 forward = text.forward, up = Vector3.ProjectOnPlane(Vector3.up, forward).normalized, right = Vector3.Cross(up, forward);
+        // The text plane is tilted against the sheet (see Place), so lie flush on the sheet's normal (local right) and stay level with the world's up.
+        Vector3 forward = anchor.transform.right;
+        if (Vector3.Dot(forward, text.forward) < 0f) forward = -forward;
+        Vector3 up = Vector3.ProjectOnPlane(Vector3.up, forward).normalized, right = Vector3.Cross(up, forward);
         var sheet = anchor.GetComponent<Renderer>();
         var b = sheet != null ? sheet.bounds : new Bounds(text.position, Vector3.one);
         float sheetWidth = Extent(b.size, right);
@@ -91,22 +98,22 @@ public static class ContractItemUI
         go.transform.SetParent(anchor.transform.parent, false);
         go.AddComponent<Canvas>().renderMode = RenderMode.WorldSpace;
         var rt = go.GetComponent<RectTransform>();
-        rt.sizeDelta = new Vector2(400f, 70f);
+        rt.sizeDelta = new Vector2(400f, 110f);
         go.transform.rotation = Quaternion.LookRotation(forward, up);
-        // Down onto the bottom frame, right of the hinge, and out toward the viewer since the frame stands in front of the cork.
-        go.transform.position = sheetBottom + right * (sheetWidth * 0.15f) - up * (sheetWidth * 1.32f) - forward * (sheetWidth * 0.15f);
+        // Onto the empty cork below the SETTINGS sign, lifted just off the cork so it does not z-fight.
+        go.transform.position = sheetBottom + right * (sheetWidth * -0.06f) - up * (sheetWidth * 0.95f) - forward * (sheetWidth * 0.01f);
         float scale = sheetWidth * 1.5f / rt.sizeDelta.x;
         var parent = go.transform.parent.lossyScale;
         go.transform.localScale = new Vector3(scale / parent.x, scale / parent.y, scale / parent.z);
 
         var t = go.AddComponent<TextMeshProUGUI>();
         t.font = anchor.infoText.font;
-        t.fontSize = 22;
-        t.color = Color.white;
-        t.alignment = TextAlignmentOptions.Left;
+        t.fontSize = 28;
+        t.color = new Color(0.4f, 0.37f, 0.32f, 0.85f); // unlit text gets brightened by exposure, so a dark tone still reads as faded cream
+        t.alignment = TextAlignmentOptions.Center;
         t.enableWordWrapping = true;
         t.raycastTarget = false;
-        t.text = "<b>TellMeCosmetics Note:</b>\nIf an item shows \"?\", enter that map type once";
+        t.text = "<b>TellMeCosmetics Note:</b>\n<b><size=140%>?</size> =</b> cannot be predicted yet\nPlay that map type once to reveal it";
         return go.transform;
     }
 
@@ -124,6 +131,11 @@ public static class ContractItemUI
         var alt = Text(ui, Child(root, "Alt", new Vector2(0, LabelHeight / 2), new Vector2(Width, IconHeight)), 80);
         alt.fontStyle = FontStyles.Bold;
         alt.color = new Color(0.85f, 0.85f, 0.8f); // sits on the black square
+
+        var spin = Child(root, "Spinner", new Vector2(0, LabelHeight / 2), new Vector2(IconHeight, IconHeight) * 0.45f).AddComponent<Image>();
+        spin.sprite = LoadingSprite();
+        spin.color = alt.color;
+        spin.raycastTarget = false;
 
         // Badge text only; its red tag is painted into the lit paper texture by Compose.
         var badge = Text(ui, Child(root, "Badge", BadgePos, BadgeSize), 21);
@@ -161,6 +173,66 @@ public static class ContractItemUI
         var m = new Material(Shader.Find("HDRP/Lit"));
         m.SetFloat("_Smoothness", 0f); // matte like paper
         return m;
+    }
+
+    // Turns the loading icon like the loading screen's Rotater (-180°/s); call every frame while it shows.
+    public static void Spin(ContractUI ui)
+    {
+        var s = ui.transform.Find(Name + "/Spinner");
+        if (s != null && s.gameObject.activeSelf) s.Rotate(0f, 0f, -180f * Time.deltaTime, Space.Self);
+    }
+
+    private const string LoadingName = "Circle Dash 2 64px - Stroke 10px"; // LoadingScreen scene's loading icon
+    private static Sprite loadingSprite;
+    private static bool loadingTried;
+
+    // The LoadingScreen scene is not loaded in the lobby, so its texture is read from disk: sharedassets3 has no type trees, so the
+    // Texture2D is read raw (width/height/format right after the name, stream data ending in its .resS path) and handed to Unity as-is.
+    private static Sprite LoadingSprite()
+    {
+        if (loadingSprite != null || loadingTried) return loadingSprite;
+        loadingTried = true;
+        try
+        {
+            const string file = "sharedassets3.assets";
+            var dir = MelonLoader.Utils.MelonEnvironment.UnityGameDataDirectory;
+            var am = new AssetsTools.NET.Extra.AssetsManager();
+            var inst = am.LoadAssetsFile(System.IO.Path.Combine(dir, file), false);
+            try
+            {
+                var r = inst.file.Reader;
+                foreach (var info in inst.file.GetAssetsOfType(AssetsTools.NET.Extra.AssetClassID.Texture2D))
+                {
+                    r.Position = info.GetAbsoluteByteOffset(inst.file);
+                    var b = r.ReadBytes((int)info.ByteSize);
+                    int nameLen = System.BitConverter.ToInt32(b, 0);
+                    if (nameLen != LoadingName.Length || System.Text.Encoding.UTF8.GetString(b, 4, nameLen) != LoadingName) continue;
+                    int o = 4 + (nameLen + 3) / 4 * 4 + 8; // aligned name, then fallback format + 2 bools (aligned)
+                    int w = System.BitConverter.ToInt32(b, o), h = System.BitConverter.ToInt32(b, o + 4), fmt = System.BitConverter.ToInt32(b, o + 16);
+                    var path = System.Text.Encoding.ASCII.GetBytes(file + ".resS");
+                    int p = System.MemoryExtensions.LastIndexOf(System.MemoryExtensions.AsSpan(b), path);
+                    if (p < 16) return null;
+                    long offset = System.BitConverter.ToInt64(b, p - 16);
+                    int size = System.BitConverter.ToInt32(b, p - 8);
+                    var data = new byte[size];
+                    using (var fs = System.IO.File.OpenRead(System.IO.Path.Combine(dir, file + ".resS")))
+                    {
+                        fs.Position = offset;
+                        for (int n = 0, k; n < size; n += k)
+                            if ((k = fs.Read(data, n, size - n)) <= 0) throw new System.IO.EndOfStreamException();
+                    }
+                    var tex = new Texture2D(w, h, (TextureFormat)fmt, false) { hideFlags = HideFlags.DontUnloadUnusedAsset };
+                    tex.LoadRawTextureData(data);
+                    tex.Apply(false, true);
+                    loadingSprite = Sprite.Create(tex, new Rect(0, 0, w, h), new Vector2(0.5f, 0.5f));
+                    loadingSprite.hideFlags = HideFlags.DontUnloadUnusedAsset;
+                    return loadingSprite;
+                }
+            }
+            finally { am.UnloadAll(); }
+        }
+        catch (System.Exception ex) { MelonLoader.MelonLogger.Warning($"Loading icon not read: {ex.Message}"); }
+        return null;
     }
 
     private const float PaperW = Width + 2 * Border, PaperH = IconHeight + LabelHeight + 2 * Border; // canvas units

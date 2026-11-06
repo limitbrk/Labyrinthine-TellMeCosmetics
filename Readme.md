@@ -10,7 +10,7 @@ Know which cosmetic a map has **before** you find it.
 > [!CAUTION]
 > **Use at your own risk:** This is an unofficial fan-made mod, not affiliated with or supported by the Labyrinthine developers. Mods may cause unexpected bugs, crashes, or save-related issues. If you encounter any problems with this mod, please [report them here](https://github.com/limitbrk/Labyrinthine-TellMeCosmetics/issues/new) rather than contacting the game developers.
 >
-> **A note on gameplay:** This mod is designed as a convenience tool. Knowing rewards in advance may take away some of the mystery, challenge, and sense of discovery that make the game enjoyable. Since it can spoil the surprise for others, I recommend using it only with friends or in a private lobby with people you know. If you're new to the game, I strongly encourage you to play it without the mod first, the way it was meant to be experienced.
+> **A note on gameplay:** This mod is designed as a convenience tool. Knowing rewards in advance may take away some of the mystery, challenge, and sense of discovery that make the game enjoyable. Since it can spoil the surprise for others, I recommend using it only with friends or in a private lobby with people you know. If you're new to the game, I strongly recommend playing without the mod first to get the best experience and discover everything as the developers intended.
 
 ## Examples
 ### In a maze (press `Tab`)
@@ -84,11 +84,13 @@ Start the game once, then close it. The file `Mods/TellMeCosmetics_config.cfg` i
 [Gameplay]
 RevealAllItems = false
 DebugMazeTests = false
+DebugPerfTest = false
 ```
 | Setting | Default | Description |
 |---|---|---|
 | `RevealAllItems` | `false` | Show every item, including ones you have not discovered |
 | `DebugMazeTests` | `false` | Developer only. Compares each maze generation step with the game and logs `MATCH`/`MISMATCH`. Makes map loading slower |
+| `DebugPerfTest` | `false` | Developer only. In the lobby, times 100 maze simulations per maze type and logs `⏱️Perf`. The lobby stutters while it runs |
 
 <details>
 <summary>Cache files</summary>
@@ -217,3 +219,34 @@ To count failed builds, `src/Predict` copies the game's maze builder (`MazeGener
 1. Launch the game and enter each DLC maze once.
 2. Copy `UserData/TellMeCosmetics.maze.bin` and `UserData/TellMeCosmetics/pool.*.txt` into `baseline/`.
 
+
+### Performance Test Result
+Time for `ScenePreload` to read each maze type's data (`ReadAll` → `ReadScene`), measured offline on game 1.0.3 (6 runs; Ryzen 7 7735HS, 32 GB RAM, NVMe SSD). All 21 results matched `baseline/`.
+
+| Maze type | Map | First run (ms) | Median (ms) |
+|---|---|---|---|
+| 0 | Maze_A | 1943 | 1319 |
+| 1 | Maze_B | 805 | 785 |
+| 2 | Maze_C | 868 | 864 |
+| 3 | Maze_D | 74 | 74 |
+| 4 | Maze_E | 164 | 168 |
+| 5 | Maze_F | 919 | 945 |
+| 6 | Maze_G | 1480 | 1409 |
+| 7 | Maze_H | 1055 | 1009 |
+| 8 | Maze_I | 165 | 159 |
+| 9 | Maze_J | 84 | 87 |
+| 10 | Maze_K | 175 | 157 |
+| 11 | Maze_L | 838 | 780 |
+| 12 | Maze_M | 103 | 100 |
+| 13 | Maze_N | 85 | 80 |
+| 14 | Maze_O | 87 | 90 |
+| 15 | Maze_P | 408 | 406 |
+| 16 | Maze_Backrooms | 815 | 780 |
+| 17 | Maze_Q | 86 | 85 |
+| 18 | Maze_R | 97 | 94 |
+| 19 | DLC_Egypt_A | 90 | 84 |
+| 20 | DLC_Egypt_B | 73 | 64 |
+| **Total** | | **10821** | **9692** |
+
+- Maze_A also loads the shared asset files used by the other maps.
+- Runs on a background thread at startup and only when the game version does not match `baseline/`. The log shows the time per maze type: `Preload: ... per maze type [...]`.

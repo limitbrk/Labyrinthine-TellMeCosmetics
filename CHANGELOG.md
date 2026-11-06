@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.3
+- Lobby prediction runs in the background, so the contract board no longer freezes while it works out the cosmetics. Cards show the game's loading icon until the result is ready.
+- Lobby prediction is about 3-4x faster.
+- New developer setting `DebugPerfTest`: logs how long the prediction takes per maze type.
+- Docs: wording improvements and preload performance results.
+
 ## 1.0.2
 - Docs: added how to fully uninstall mods and some documentation improvements.
 - Package now includes this changelog.

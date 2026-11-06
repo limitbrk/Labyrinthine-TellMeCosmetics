@@ -109,7 +109,7 @@ public static class ContractPredictor
     }
 
     // WeightedRandom.PickRandom: first entry where acc + w >= NextDouble() * Σw, else the last one.
-    private static Entry Pick(Il2CppSystem.Random rnd, Entry[] list)
+    private static Entry Pick(NetRandom rnd, Entry[] list)
     {
         if (list.Length == 0) return null;
         double total = 0, acc = 0;
@@ -129,56 +129,69 @@ public static class ContractPredictor
         MapSize = (int)c.MapSize, LandmarkCount = c.LandmarkCount, PuzzleCount = c.PuzzleCount,
     };
 
-    private static readonly System.Collections.Generic.Dictionary<(int, int, int, int, int), MazePipeline.Outcome> outcomes = new();
+    // Main thread only; each simulation runs on a worker so the lobby never stalls (up to ~0.4 s per contract).
+    private static readonly System.Collections.Generic.Dictionary<(int, int, int, int, int), System.Threading.Tasks.Task<MazePipeline.Outcome>> outcomes = new();
     public static void ClearOutcomes() => outcomes.Clear();
 
     // Seeds MazeGenerator holds after generation: each failed maze attempt shifts them (MazeGenerator.CreateMaze).
-    public static (int seed, int second, bool simulated) MazeSeeds(Contract contract)
+    // wait=false returns pending=true while the simulation is still running.
+    public static (int seed, int second, bool simulated) MazeSeeds(Contract contract) => MazeSeeds(contract, true, out _);
+
+    public static (int seed, int second, bool simulated) MazeSeeds(Contract contract, bool wait, out bool pending)
     {
+        pending = false;
         var input = ToInput(contract);
         var cfg = MazePipeline.Get(input.MazeType);
         if (cfg == null) return (input.Seed, input.SecondSeed, false);
+        if (TellMeCosmetics.Config.ConfigManager.Instance.DebugPerfTest.Value) PredictPerfTest.BenchOnce(cfg, input);
         var key = (input.Seed, input.SecondSeed, input.MazeType, input.MapX, input.MapY);
-        if (!outcomes.TryGetValue(key, out var o))
-        {
-            try { o = MazePipeline.Simulate(cfg, input); }
-            catch (Exception ex) { MelonLogger.Warning($"Maze simulation failed: {ex}"); o = null; }
-            outcomes[key] = o;
-        }
+        if (!outcomes.TryGetValue(key, out var task))
+            outcomes[key] = task = System.Threading.Tasks.Task.Run(() =>
+            {
+                try { return MazePipeline.Simulate(cfg, input); }
+                catch (Exception ex) { MelonLogger.Warning($"Maze simulation failed: {ex}"); return null; }
+            });
+        if (!wait && !task.IsCompleted) { pending = true; return (input.Seed, input.SecondSeed, false); }
+        var o = task.Result;
         return o == null ? (input.Seed, input.SecondSeed, false) : (o.Seed, o.SecondSeed, true);
     }
 
     /// <summary>
     /// Cosmetic ItemID the contract's maze will spawn, or null when the spawn-chance roll fails.
     /// simulated=false means the maze type was never captured (no pool, or seeds assume the maze builds on its first attempt).
+    /// pending=true: the maze simulation is still running in the background; call again later.
     /// </summary>
-    public static int? Predict(Contract contract, out float chance, out bool simulated)
+    public static int? Predict(Contract contract, out float chance, out bool simulated) => Predict(contract, true, out chance, out simulated, out _);
+
+    public static int? Predict(Contract contract, bool wait, out float chance, out bool simulated, out bool pending)
     {
         chance = 0;
         simulated = false;
+        pending = false;
         var pool = GetPool((int)contract.MazeType);
         if (pool == null) return null;
-        var (seed, second, sim) = MazeSeeds(contract);
+        var (seed, second, sim) = MazeSeeds(contract, wait, out pending);
+        if (pending) return null;
         simulated = sim;
         int type = (int)contract.ContractType;
 
         // SpawnCustomizationItems: chanceForItem[type] > Random(second).NextDouble()
         if (type >= pool.Chance.Length) return null;
         chance = pool.Chance[type];
-        if (!(chance > new Il2CppSystem.Random(second).NextDouble())) return null;
+        if (!(chance > new NetRandom(second).NextDouble())) return null;
 
         Entry[] list = null;
         if (type != Hardcore && SeasonalEventsTimeHandler.TryGetActiveSeasonalEvent(out var evt, out _, out _) && evt != null)
         {
             var cfg = pool.Seasonal.FirstOrDefault(c => c.Prefabs.Length > 0 && c.Type == (int)evt.EventType);
-            if (cfg != null && cfg.Chance > new Il2CppSystem.Random(second + 0x12b5).NextDouble()) list = cfg.Prefabs;
+            if (cfg != null && cfg.Chance > new NetRandom(second + 0x12b5).NextDouble()) list = cfg.Prefabs;
         }
         list ??= type == Hardcore ? pool.Hardcore : pool.Normal;
 
         var excluded = contract.m_ExcludedCustomizationItemIDs;
         bool ok(Entry e) => e != null && e.Id >= 0 && !(excluded?.Contains((ushort)e.Id) ?? false);
 
-        var rnd = new Il2CppSystem.Random(unchecked(second + 0x23e3 + seed + 0x692) / 2);
+        var rnd = new NetRandom(unchecked(second + 0x23e3 + seed + 0x692) / 2);
         for (int i = 0; i < 50; i++)
         {
             var e = Pick(rnd, list);

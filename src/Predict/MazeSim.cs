@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace TellMeCosmetics.Predict;
 
 // Port of MazeDataGenerator.DataFromDimensions and its callees (GameAssembly RVA 0x892da0 .. 0x8957b0).
-// UnityEngine.Random / Il2CppSystem.Random are the game's own RNGs, so sequences match bit for bit.
+// UnityRandom / NetRandom are C# copies of the game's RNGs (GameRandom.cs), so sequences match bit for bit.
 public static class MazeSim
 {
     public sealed class Sub { public float Chance; public int RadiusMin, RadiusMax; public float RadiusMaxMapPercent; }
@@ -39,19 +39,19 @@ public static class MazeSim
     {
         var res = new Result();
         if (inp.Prev != null) { res.End = inp.Prev.End; res.EndDir = inp.Prev.EndDir; res.EndEuler = inp.Prev.EndEuler; }
-        UnityEngine.Random.InitState(inp.Seed);
+        var ur = new UnityRandom(inp.Seed); // UnityEngine.Random.InitState(inp.Seed)
         if (inp.MazeType == MazeD)
         {
-            res.Map = Kruskal(new Il2CppSystem.Random(inp.Seed), inp.Cols, inp.Rows);
+            res.Map = Kruskal(new NetRandom(inp.Seed), inp.Cols, inp.Rows);
         }
         else
         {
             res.Map = new int[inp.MapX, inp.MapY];
-            GenerateMaze(res.Map, inp.Threshold);
+            GenerateMaze(res.Map, inp.Threshold, ur);
             InsertSubGenerations(res.Map, inp);
         }
 
-        var startCfg = PieceCfg(inp, true);
+        var startCfg = PieceCfg(inp, true, ur);
         res.StartEuler = 0;
         var dir = (0, 0);
         EdgePoint(res.Map, inp, startCfg, ref res.StartEuler, out res.Start, ref dir, false, default, 5);
@@ -59,7 +59,7 @@ public static class MazeSim
 
         for (int i = 0; i < 20; i++)
         {
-            var endCfg = PieceCfg(inp, false);
+            var endCfg = PieceCfg(inp, false, ur);
             int e = 0;
             var d = (0, 0);
             if (EdgePoint(res.Map, inp, endCfg, ref e, out var p, ref d, true, res.Start, inp.MinStartToEnd))
@@ -73,18 +73,18 @@ public static class MazeSim
         return res;
     }
 
-    private static void GenerateMaze(int[,] m, float threshold)
+    private static void GenerateMaze(int[,] m, float threshold, UnityRandom ur)
     {
         int rMax = m.GetLength(0) - 1, cMax = m.GetLength(1) - 1;
         for (int i = 0; i <= rMax; i++)
             for (int j = 0; j <= cMax; j++)
             {
                 if (i == 0 || j == 0 || i == rMax || j == cMax) { m[i, j] = 1; continue; }
-                if (((i | j) & 1) != 0 || !(UnityEngine.Random.value > threshold)) continue;
+                if (((i | j) & 1) != 0 || !(ur.Value > threshold)) continue;
                 m[i, j] = 1;
                 int a, b;
-                if (UnityEngine.Random.value >= 0.5f) { a = UnityEngine.Random.value >= 0.5f ? 1 : -1; b = 0; }
-                else { a = 0; b = UnityEngine.Random.value >= 0.5f ? 1 : -1; }
+                if (ur.Value >= 0.5f) { a = ur.Value >= 0.5f ? 1 : -1; b = 0; }
+                else { a = 0; b = ur.Value >= 0.5f ? 1 : -1; }
                 m[i + a, j + b] = 1;
             }
     }
@@ -100,7 +100,7 @@ public static class MazeSim
         }
         if (s.RadiusMax < s.RadiusMin) { s.Chance = 0; s.RadiusMin = s.RadiusMax; }
 
-        var rnd = new Il2CppSystem.Random(unchecked(inp.SecondSeed + 0x69d));
+        var rnd = new NetRandom(unchecked(inp.SecondSeed + 0x69d));
         if (!(rnd.NextDouble() <= s.Chance)) return;
 
         int lim = System.Math.Min(inp.Rows, inp.Cols) / 2 - 1;
@@ -124,7 +124,7 @@ public static class MazeSim
         if ((uint)x < (uint)m.GetLength(0) && (uint)y < (uint)m.GetLength(1)) m[x, y] = v;
     }
 
-    private static int[,] Kruskal(Il2CppSystem.Random rnd, int w, int h)
+    private static int[,] Kruskal(NetRandom rnd, int w, int h)
     {
         var maze = new int[h, w];
         var cells = new Cell[h, w];
@@ -161,7 +161,7 @@ public static class MazeSim
         }
     }
 
-    private static PieceConfig PieceCfg(Input inp, bool isStart)
+    private static PieceConfig PieceCfg(Input inp, bool isStart, UnityRandom ur)
     {
         var cfg = new PieceConfig { Allowed = new List<int> { Walkable } };
         if (inp.MazeType == MazeD)
@@ -172,10 +172,10 @@ public static class MazeSim
             return cfg;
         }
         if (inp.MazeType == MazeN) cfg.Allowed.Add(Wall);
-        cfg.MoveOnX = UnityEngine.Random.value > 0.5f;
-        cfg.StartFromZero = UnityEngine.Random.value > 0.5f;
+        cfg.MoveOnX = ur.Value > 0.5f;
+        cfg.StartFromZero = ur.Value > 0.5f;
         int pos = cfg.MoveOnX ? inp.Cols : inp.Rows;
-        float v = UnityEngine.Random.value;
+        float v = ur.Value;
         cfg.StartPos = v < 0.33f ? 0 : v < 0.66f ? pos / 2 : pos;
         return cfg;
     }

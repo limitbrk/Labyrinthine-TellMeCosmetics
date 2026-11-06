@@ -18,7 +18,7 @@ class MazeStructuresTest
         public MazeStructures.Settings Cfg;
         public List<MazeStructures.Placed> Spawned;
         public MazeStructures.Structure[] Arr;
-        public Il2CppSystem.Random R;
+        public NetRandom R;
         public int OutBefore;
     }
 
