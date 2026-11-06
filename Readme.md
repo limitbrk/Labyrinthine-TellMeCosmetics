@@ -7,6 +7,11 @@ Know which cosmetic a map has **before** you find it.
 > [!WARNING]
 > Lobby prediction is **Beta** and may have bugs. If the mod causes problems, use the older [v0.1.5](https://github.com/limitbrk/Labyrinthine-TellMeCosmetics/releases/tag/v0.1.5) instead.
 
+> [!CAUTION]
+> **Use at your own risk:** This is an unofficial fan-made mod, not affiliated with or supported by the Labyrinthine developers. Mods may cause unexpected bugs, crashes, or save-related issues. If you encounter any problems with this mod, please [report them here](https://github.com/limitbrk/Labyrinthine-TellMeCosmetics/issues/new) rather than contacting the game developers.
+>
+> **A note on gameplay:** This mod is designed as a convenience tool. Knowing rewards in advance may take away some of the mystery, challenge, and sense of discovery that make the game enjoyable. Since it can spoil the surprise for others, I recommend using it only with friends or in a private lobby with people you know. If you're new to the game, I strongly encourage you to play it without the mod first, the way it was meant to be experienced.
+
 ## Examples
 ### In a maze (press `Tab`)
 The item shows at the bottom-left of the screen:
@@ -25,7 +30,7 @@ The item shows at the bottom-left of the screen:
 
 ### Contract board in the lobby
 > [!WARNING]
-> **Beta.** Lobby prediction is new. It may be wrong after a game update or for maze types it has not seen yet. Please report wrong predictions in [Issues](https://github.com/limitbrk/Labyrinthine-TellMeCosmetics/issues).
+> **Beta.** Lobby prediction is new. It may be wrong after a game update or for maze types it has not seen yet. Please report wrong predictions in [Issues](https://github.com/limitbrk/Labyrinthine-TellMeCosmetics/issues/new).
 
 ![lobby contract board](docs/Mod_Example5_Lobby.png)
 
@@ -54,6 +59,20 @@ Available on Thunderstore: https://thunderstore.io/c/labyrinthine/p/LimitBRK/Tel
 1. Install [MelonLoader](https://melonwiki.xyz) **v0.7.3 or newer**.
 2. Download the latest `.dll` from [Releases](https://github.com/limitbrk/Labyrinthine-TellMeCosmetics/releases/latest).
 3. Copy the `.dll` into the `Mods` folder in the game folder.
+
+## Uninstall
+- **Only this mod:** remove it in the mod manager, or delete `Mods/TellMeCosmetics.dll`.
+- **All mods (clean uninstall):** pick one:
+  - In Steam: right-click Labyrinthine → **Properties → Installed Files → Verify integrity of game files**.
+  - Or delete these from the game folder: the `MelonLoader` folder, the `UserData` folder (mod settings) and `version.dll`.
+
+    ![game folder: delete MelonLoader, UserData and version.dll](docs/Uninstall_Game_Folder.png)
+
+  You can also delete the `Mods`, `Plugins` and `UserLibs` folders if they exist.
+
+**Check:** if this MelonLoader console window still appears when the game starts, MelonLoader is not fully uninstalled. Delete the files above.
+
+![MelonLoader console](docs/Uninstall_MelonLoader_Console.png)
 
 ## Settings
 Start the game once, then close it. The file `Mods/TellMeCosmetics_config.cfg` is created:

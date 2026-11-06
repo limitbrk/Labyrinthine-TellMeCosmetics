@@ -2,7 +2,7 @@
   <PropertyGroup>
     <AssemblyName>TellMeCosmetics</AssemblyName>
     <Product>Tell Me Cosmetics</Product>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <RootNamespace>TellMeCosmetics</RootNamespace>
     <Author>LimitBRK</Author>
     
@@ -72,8 +72,9 @@
       SourceFiles="@(PackageFiles)"
       DestinationFiles="@(PackageFiles->'$(OutputPath)%(Filename)%(Extension)')"
       SkipUnchangedFiles="true" />
-    <!-- Thunderstore needs README.md; the source is User-Readme.md -->
-    <Copy SourceFiles="User-Readme.md" DestinationFiles="$(OutputPath)README.md" />
+    <!-- Thunderstore needs README.md; the source is USER.README.md -->
+    <Copy SourceFiles="USER.README.md" DestinationFiles="$(OutputPath)README.md" />
+    <Copy SourceFiles="CHANGELOG.md" DestinationFiles="$(OutputPath)CHANGELOG.md" />
   </Target>
   <Target Name="GenerateManifest" AfterTargets="Build">
     <WriteLinesToFile
