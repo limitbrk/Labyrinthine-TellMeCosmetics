@@ -41,21 +41,25 @@ Wrong prediction? Please report it in [Issues](https://github.com/limitbrk/Labyr
 
 ## Installation
 ### With a mod manager
-Install with r2modman / Thunderstore Mod Manager. MelonLoader is installed for you.
+Install with Thunderstore Mod Manager. MelonLoader is installed for you.
 
 ### Manual
 1. Install [MelonLoader](https://melonwiki.xyz) **v0.7.3 or newer**.
 2. Copy `TellMeCosmetics.dll` into the `Mods` folder in the game folder.
 
 ## Uninstall
-- **Only this mod:** remove it in the mod manager, or delete `Mods/TellMeCosmetics.dll`.
-- **All mods (clean uninstall):** pick one:
-  - In Steam: right-click Labyrinthine → **Properties → Installed Files → Verify integrity of game files**.
-  - Or delete these from the game folder: the `MelonLoader` folder, the `UserData` folder (mod settings) and `version.dll`.
+- **Only this mod:**
+  - With a mod manager: remove it on the mod manager's page.
+  - Manual install: delete `Mods/TellMeCosmetics.dll`.
+- **All mods (clean uninstall):**
+  1. If you use a mod manager (Thunderstore Mod Manager), uninstall it first.
+  2. Then pick one:
+     - In Steam: right-click Labyrinthine → **Properties → Installed Files → Verify integrity of game files**.
+     - Or delete these from the game folder: the `MelonLoader` folder, the `UserData` folder (mod settings) and `version.dll`.
 
-    ![game folder: delete MelonLoader, UserData and version.dll](https://github.com/limitbrk/Labyrinthine-TellMeCosmetics/blob/main/docs/Uninstall_Game_Folder.png?raw=true)
+       ![game folder: delete MelonLoader, UserData and version.dll](https://github.com/limitbrk/Labyrinthine-TellMeCosmetics/blob/main/docs/Uninstall_Game_Folder.png?raw=true)
 
-  You can also delete the `Mods`, `Plugins` and `UserLibs` folders if they exist.
+     You can also delete the `Mods`, `Plugins` and `UserLibs` folders if they exist.
 
 **Check:** if this MelonLoader console window still appears when the game starts, MelonLoader is not fully uninstalled. Delete the files above.
 

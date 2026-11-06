@@ -61,14 +61,18 @@ Available on Thunderstore: https://thunderstore.io/c/labyrinthine/p/LimitBRK/Tel
 3. Copy the `.dll` into the `Mods` folder in the game folder.
 
 ## Uninstall
-- **Only this mod:** remove it in the mod manager, or delete `Mods/TellMeCosmetics.dll`.
-- **All mods (clean uninstall):** pick one:
-  - In Steam: right-click Labyrinthine → **Properties → Installed Files → Verify integrity of game files**.
-  - Or delete these from the game folder: the `MelonLoader` folder, the `UserData` folder (mod settings) and `version.dll`.
+- **Only this mod:**
+  - With a mod manager: remove it on the mod manager's page.
+  - Manual install: delete `Mods/TellMeCosmetics.dll`.
+- **All mods (clean uninstall):**
+  1. If you use a mod manager (Thunderstore Mod Manager), uninstall it first.
+  2. Then pick one:
+     - In Steam: right-click Labyrinthine → **Properties → Installed Files → Verify integrity of game files**.
+     - Or delete these from the game folder: the `MelonLoader` folder, the `UserData` folder (mod settings) and `version.dll`.
 
-    ![game folder: delete MelonLoader, UserData and version.dll](docs/Uninstall_Game_Folder.png)
+       ![game folder: delete MelonLoader, UserData and version.dll](docs/Uninstall_Game_Folder.png)
 
-  You can also delete the `Mods`, `Plugins` and `UserLibs` folders if they exist.
+     You can also delete the `Mods`, `Plugins` and `UserLibs` folders if they exist.
 
 **Check:** if this MelonLoader console window still appears when the game starts, MelonLoader is not fully uninstalled. Delete the files above.
 
