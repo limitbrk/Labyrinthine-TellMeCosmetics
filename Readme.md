@@ -253,7 +253,7 @@ Time for `ScenePreload` to read each maze type's data (`ReadAll` → `ReadScene`
 - Runs on a background thread at startup and only when the game version does not match `baseline/`. The log shows the time per maze type: `Preload: ... per maze type [...]`.
 
 #### Predict
-Time for one lobby prediction: replaying maze generation from the contract's seeds (`MazePipeline.Simulate`) to find the seeds the cosmetic roll uses. Measured in-game on game 1.0.3 with `DebugPerfTest` (100 fixed random seeds per maze type, map size taken from a lobby contract).
+Time for one lobby prediction: replaying maze generation from the contract's seeds (`MazePipeline.Simulate`) to find the seeds the cosmetic roll uses. Measured in-game on game 1.0.3 (same machine as above) with `DebugPerfTest` (100 fixed random seeds per maze type, map size taken from a lobby contract).
 
 | Maze type | Map | Failed builds (avg) | Before avg (ms) | Before max (ms) | After avg (ms) | After p95 (ms) | After max (ms) |
 |---|---|---|---|---|---|---|---|
